@@ -7,9 +7,7 @@ const path = require('path');
 const PDFDocument = require('pdfkit');
 const dns = require('dns');
 
-// 👈 Import email alert utility
-const { sendCarbonAlert } = require('./utils/mailer');
-
+// Force Node.js DNS resolution to Google DNS to prevent SRV connection errors
 try {
   dns.setServers(['8.8.8.8', '8.8.4.4']);
   console.log('🌐 Node DNS set to Google Public DNS (8.8.8.8)');
@@ -22,12 +20,14 @@ const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_carbon_key_2026';
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://ashikpoojary2005_db_user:5qoIcQsBV8caZkcp@cluster0.dxrrxua.mongodb.net/carbondb?retryWrites=true&w=majority';
 
+// Middleware
 app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 mongoose.set('bufferCommands', false);
 
+// Database Connection
 mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 10000 })
   .then(() => console.log('✅ Connected to MongoDB database successfully.'))
   .catch(err => console.error('❌ MongoDB Connection Error:', err.message));
@@ -41,7 +41,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// SCHEMAS
+// --- SCHEMAS ---
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
@@ -53,14 +53,17 @@ const UserSchema = new mongoose.Schema({
 const CarbonLogSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   accountType: { type: String, enum: ['person', 'factory'], required: true },
+  // Person metrics
   transportMode: { type: String, default: 'none' },
   transportDistance: { type: Number, default: 0 },
   gridPowerKwh: { type: Number, default: 0 },
   solarPowerKwh: { type: Number, default: 0 },
   wasteKg: { type: Number, default: 0 },
+  // Factory metrics
   coalTons: { type: Number, default: 0 },
   hazardousWasteKg: { type: Number, default: 0 },
   solidWasteKg: { type: Number, default: 0 },
+  // Calculated Totals
   offsetKg: { type: Number, default: 0 },
   releasedKg: { type: Number, required: true },
   savedKg: { type: Number, required: true },
@@ -73,6 +76,7 @@ const CarbonLogSchema = new mongoose.Schema({
 const User = mongoose.model('User', UserSchema);
 const CarbonLog = mongoose.model('CarbonLog', CarbonLogSchema);
 
+// --- JWT AUTH MIDDLEWARE ---
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -85,7 +89,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// AUTH ROUTES
+// --- AUTHENTICATION ROUTES ---
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, email, password, accountType } = req.body;
@@ -123,7 +127,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// LOGS ROUTES
+// --- CARBON LOGS ROUTES ---
 app.get('/api/logs', authenticateToken, async (req, res) => {
   try {
     const logs = await CarbonLog.find({ userId: req.user.id }).sort({ date: -1 });
@@ -186,13 +190,6 @@ app.post('/api/logs', authenticateToken, async (req, res) => {
     });
 
     await newLog.save();
-
-    // 👈 TRIGGER EMAIL NOTIFICATION IF EMISSIONS ARE HIGH (>80 kg)
-    const userObj = await User.findById(req.user.id);
-    if (userObj && totalReleased >= 80) {
-      sendCarbonAlert(userObj.email, userObj.username, Number(totalReleased.toFixed(2)), 100);
-    }
-
     res.status(201).json(newLog);
   } catch (error) {
     res.status(500).json({ error: 'Failed to calculate and save log.' });
@@ -209,7 +206,7 @@ app.delete('/api/logs/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// EXPORT ENDPOINTS
+// --- EXPORT ENDPOINTS ---
 app.get('/api/export/csv', authenticateToken, async (req, res) => {
   try {
     const logs = await CarbonLog.find({ userId: req.user.id }).sort({ date: -1 });
@@ -300,6 +297,7 @@ app.get('/api/export/monthly-pdf', authenticateToken, async (req, res) => {
   }
 });
 
+// LEADERBOARD ENDPOINT
 app.get('/api/leaderboard', async (req, res) => {
   try {
     const leaderboard = await CarbonLog.aggregate([
