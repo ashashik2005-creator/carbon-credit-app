@@ -7,7 +7,9 @@ const path = require('path');
 const PDFDocument = require('pdfkit');
 const dns = require('dns');
 
-// 1. Force Node.js DNS resolution to Google DNS to prevent SRV connection errors
+// 👈 Import email alert utility
+const { sendCarbonAlert } = require('./utils/mailer');
+
 try {
   dns.setServers(['8.8.8.8', '8.8.4.4']);
   console.log('🌐 Node DNS set to Google Public DNS (8.8.8.8)');
@@ -18,18 +20,14 @@ try {
 const app = express();
 const PORT = process.env.PORT || 5000;
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_carbon_key_2026';
-
-// MongoDB Atlas Connection URI
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://ashikpoojary2005_db_user:5qoIcQsBV8caZkcp@cluster0.dxrrxua.mongodb.net/carbondb?retryWrites=true&w=majority';
 
-// Middleware
 app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 mongoose.set('bufferCommands', false);
 
-// Database Connection
 mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 10000 })
   .then(() => console.log('✅ Connected to MongoDB database successfully.'))
   .catch(err => console.error('❌ MongoDB Connection Error:', err.message));
@@ -43,7 +41,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- SCHEMAS ---
+// SCHEMAS
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
@@ -55,17 +53,14 @@ const UserSchema = new mongoose.Schema({
 const CarbonLogSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   accountType: { type: String, enum: ['person', 'factory'], required: true },
-  // Person metrics
   transportMode: { type: String, default: 'none' },
   transportDistance: { type: Number, default: 0 },
   gridPowerKwh: { type: Number, default: 0 },
   solarPowerKwh: { type: Number, default: 0 },
   wasteKg: { type: Number, default: 0 },
-  // Factory metrics
   coalTons: { type: Number, default: 0 },
   hazardousWasteKg: { type: Number, default: 0 },
   solidWasteKg: { type: Number, default: 0 },
-  // Calculated Totals
   offsetKg: { type: Number, default: 0 },
   releasedKg: { type: Number, required: true },
   savedKg: { type: Number, required: true },
@@ -78,7 +73,6 @@ const CarbonLogSchema = new mongoose.Schema({
 const User = mongoose.model('User', UserSchema);
 const CarbonLog = mongoose.model('CarbonLog', CarbonLogSchema);
 
-// --- JWT AUTH MIDDLEWARE ---
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
@@ -91,7 +85,7 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// --- AUTHENTICATION ROUTES ---
+// AUTH ROUTES
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, email, password, accountType } = req.body;
@@ -129,7 +123,7 @@ app.post('/api/auth/login', async (req, res) => {
   }
 });
 
-// --- CARBON LOGS ROUTES ---
+// LOGS ROUTES
 app.get('/api/logs', authenticateToken, async (req, res) => {
   try {
     const logs = await CarbonLog.find({ userId: req.user.id }).sort({ date: -1 });
@@ -142,48 +136,27 @@ app.get('/api/logs', authenticateToken, async (req, res) => {
 app.post('/api/logs', authenticateToken, async (req, res) => {
   try {
     const { 
-      accountType, 
-      transportMode, 
-      transportDistance, 
-      gridPowerKwh, 
-      solarPowerKwh, 
-      wasteKg, 
-      coalTons, 
-      hazardousWasteKg,
-      solidWasteKg,
-      offsetKg 
+      accountType, transportMode, transportDistance, gridPowerKwh, 
+      solarPowerKwh, wasteKg, coalTons, hazardousWasteKg, solidWasteKg, offsetKg 
     } = req.body;
 
     let totalReleased = 0;
     let totalSaved = 0;
 
     if ((accountType || req.user.accountType) === 'factory') {
-      // FACTORY CALCULATION: Coal + Hazardous Waste + Solid Industrial Waste
       const cTons = parseFloat(coalTons) || 0;
       const hazWaste = parseFloat(hazardousWasteKg) || 0;
       const solWaste = parseFloat(solidWasteKg) || 0;
 
-      const coalCO2 = cTons * 2420;   // 1 Ton Coal = 2,420 kg CO2
-      const hazCO2 = hazWaste * 2.5;  // 1 kg Hazardous Waste = 2.5 kg CO2
-      const solCO2 = solWaste * 1.5;  // 1 kg Solid Industrial Waste = 1.5 kg CO2
-
-      totalReleased = coalCO2 + hazCO2 + solCO2;
+      totalReleased = (cTons * 2420) + (hazWaste * 2.5) + (solWaste * 1.5);
       totalSaved = 0;
     } else {
-      // PERSON CALCULATION: Transport, Grid Power & Household Waste
       const transportRates = { bus: 0.089, gas_car: 0.210, diesel_car: 0.170, motorcycle: 0.103, train: 0.035, ev: 0.053, walk: 0.0, none: 0.0 };
       const tDist = parseFloat(transportDistance) || 0;
       const rate = transportRates[transportMode] || 0;
 
-      const transportCO2 = tDist * rate;
-      const gridCO2 = (parseFloat(gridPowerKwh) || 0) * 0.82;
-      const wasteCO2 = (parseFloat(wasteKg) || 0) * 1.9;
-      
-      totalReleased = transportCO2 + gridCO2 + wasteCO2;
-
-      const solarSavedCO2 = (parseFloat(solarPowerKwh) || 0) * 0.82;
-      const walkSavedCO2 = transportMode === 'walk' ? tDist * 0.210 : 0;
-      totalSaved = solarSavedCO2 + walkSavedCO2;
+      totalReleased = (tDist * rate) + ((parseFloat(gridPowerKwh) || 0) * 0.82) + ((parseFloat(wasteKg) || 0) * 1.9);
+      totalSaved = ((parseFloat(solarPowerKwh) || 0) * 0.82) + (transportMode === 'walk' ? tDist * 0.210 : 0);
     }
 
     const directOffset = parseFloat(offsetKg) || 0;
@@ -213,6 +186,13 @@ app.post('/api/logs', authenticateToken, async (req, res) => {
     });
 
     await newLog.save();
+
+    // 👈 TRIGGER EMAIL NOTIFICATION IF EMISSIONS ARE HIGH (>80 kg)
+    const userObj = await User.findById(req.user.id);
+    if (userObj && totalReleased >= 80) {
+      sendCarbonAlert(userObj.email, userObj.username, Number(totalReleased.toFixed(2)), 100);
+    }
+
     res.status(201).json(newLog);
   } catch (error) {
     res.status(500).json({ error: 'Failed to calculate and save log.' });
@@ -229,13 +209,13 @@ app.delete('/api/logs/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// --- EXPORT ENDPOINTS ---
+// EXPORT ENDPOINTS
 app.get('/api/export/csv', authenticateToken, async (req, res) => {
   try {
     const logs = await CarbonLog.find({ userId: req.user.id }).sort({ date: -1 });
     let csv = 'Date,Account Type,Transport/Industrial Mode,Released (kg),Saved (kg),Credits Earned,Trees Needed\n';
     logs.forEach(log => {
-      const modeText = log.accountType === 'factory' ? `Industrial Coal (${log.coalTons}T), HazWaste (${log.hazardousWasteKg}kg)` : log.transportMode;
+      const modeText = log.accountType === 'factory' ? `Industrial Coal (${log.coalTons}T)` : log.transportMode;
       csv += `"${new Date(log.date).toISOString().split('T')[0]}","${log.accountType}","${modeText}",${log.releasedKg},${log.savedKg},${log.creditsEarned},${log.treesNeeded}\n`;
     });
     res.header('Content-Type', 'text/csv');
@@ -266,7 +246,7 @@ app.get('/api/export/certificate', authenticateToken, async (req, res) => {
     doc.moveDown(0.5);
     doc.fontSize(22).fillColor('#0f172a').text(req.user.username.toUpperCase(), { align: 'center' });
     doc.moveDown(1);
-    doc.fontSize(12).fillColor('#475569').text(`This certificate confirms that ${req.user.username} (${req.user.accountType.toUpperCase()} MODE) has tracked carbon footprint and accumulated:`, { align: 'center' });
+    doc.fontSize(12).fillColor('#475569').text(`This certificate confirms that ${req.user.username} has tracked carbon footprint and accumulated:`, { align: 'center' });
     doc.moveDown(1.5);
     doc.fontSize(28).fillColor('#059669').text(`${totalCredits.toFixed(5)} Carbon Credits`, { align: 'center' });
     doc.fontSize(12).fillColor('#64748b').text(`(Tree Offset Requirement: ${treesNeeded} Trees to Plant)`, { align: 'center' });
@@ -307,7 +287,7 @@ app.get('/api/export/monthly-pdf', authenticateToken, async (req, res) => {
 
     logs.slice(0, 15).forEach((log, index) => {
       const modeDesc = log.accountType === 'factory' 
-        ? `Coal: ${log.coalTons}T, HazWaste: ${log.hazardousWasteKg}kg, SolidWaste: ${log.solidWasteKg}kg` 
+        ? `Coal: ${log.coalTons}T, HazWaste: ${log.hazardousWasteKg}kg` 
         : `Mode: ${log.transportMode}`;
       doc.fontSize(9).fillColor('#334155').text(
         `${index + 1}. [${new Date(log.date).toLocaleDateString()}] ${modeDesc} | Released: ${log.releasedKg} kg | Saved: ${log.savedKg} kg | Trees: ${log.treesNeeded}`
@@ -320,7 +300,6 @@ app.get('/api/export/monthly-pdf', authenticateToken, async (req, res) => {
   }
 });
 
-// LEADERBOARD ENDPOINT
 app.get('/api/leaderboard', async (req, res) => {
   try {
     const leaderboard = await CarbonLog.aggregate([
