@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EcoCredit Hub — Modern Carbon Intelligence Platform</title>
+  
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS & Chart.js -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Plus Jakarta Sans', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              400: '#4ade80',
+              500: '#22c55e',
+              600: '#16a34a',
+              900: '#14532d',
+              accent: '#00f2fe'
+            }
+          },
+          animation: {
+            'float': 'float 6s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.4); }
+
+    /* Glassmorphism Styles */
+    .glass-card {
+      background: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-input {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Ambient Background Elements */
+    .glow-orb-1 {
+      position: fixed; top: -10%; left: -10%; width: 50vw; height: 50vw;
+      background: radial-gradient(circle, rgba(34, 197, 94, 0.15) 0%, rgba(0, 0, 0, 0) 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .glow-orb-2 {
+      position: fixed; bottom: -15%; right: -10%; width: 60vw; height: 60vw;
+      background: radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
+      pointer-events: none; z-index: 0;
+    }
+
+    /* Custom Gradient Buttons */
+    .btn-gradient {
+      background: linear-gradient(135deg, #22c55e 0%, #06b6d4 100%);
+      box-shadow: 0 4px 20px -5px rgba(34, 197, 94, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-gradient:hover {
+      box-shadow: 0 8px 25px -5px rgba(34, 197, 94, 0.6);
+      transform: translateY(-1px);
+    }
+    
+    /* Modern Slider Style */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: rgba(148, 163, 184, 0.2);
+      border-radius: 8px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px; width: 18px; border-radius: 50%;
+      background: #22c55e; cursor: pointer;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+      transition: all 0.2s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.25); }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden">
+
+  <!-- Ambient Dynamic Glows -->
+  <div class="glow-orb-1"></div>
+  <div class="glow-orb-2"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+  <!-- SIGN-IN VIEW -->
+  <div id="signin-view" class="relative z-10 min-h-screen flex items-center justify-center p-4">
+    <div class="glass-card p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-cyan-500/20 text-emerald-400 border border-emerald-500/30 mb-4 animate-float shadow-inner">
+          🌱
+        </div>
+        <h1 class="text-3xl font-extrabold font-display tracking-tight text-white">EcoCredit <span class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Hub</span></h1>
+        <p class="text-slate-400 text-xs mt-1.5 font-medium">Next-Generation Carbon Intelligence Platform</p>
+      </div>
+
+      <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-5">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Username or Email</label>
+          <input type="text" id="signin-identifier" required placeholder="name@company.com" class="w-full glass-input rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Password</label>
+          <input type="password" id="signin-password" required placeholder="••••••••" class="w-full glass-input rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+        </div>
+        <button type="submit" class="w-full btn-gradient text-slate-950 font-extrabold text-sm py-3.5 rounded-xl uppercase tracking-wider">Sign In to Dashboard</button>
+      </form>
+      
+      <div class="mt-8 pt-6 border-t border-slate-800/80 text-center">
+        <p class="text-xs text-slate-400">New to EcoCredit Hub? <button onclick="navigateTo('signup')" class="text-emerald-400 font-bold hover:text-emerald-300">Create an Account</button></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGN-UP VIEW -->
+  <div id="signup-view" class="hidden relative z-10 min-h-screen flex items-center justify-center p-4">
+    <div class="glass-card p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden">
+      <div class="text-center mb-8">
+        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-emerald-500/20 text-cyan-400 border border-cyan-500/30 mb-4 animate-float shadow-inner">
+          🌍
+        </div>
+        <h1 class="text-3xl font-extrabold font-display tracking-tight text-white">Join the Movement</h1>
+        <p class="text-slate-400 text-xs mt-1.5 font-medium">Select your account tier to begin tracking</p>
+      </div>
+
+      <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-4">
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Username</label>
+          <input type="text" id="signup-username" required placeholder="ashik_dev" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Email Address</label>
+          <input type="email" id="signup-email" required placeholder="ashik@example.com" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Password</label>
+          <input type="password" id="signup-password" required minlength="6" placeholder="••••••••" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+        </div>
+        <div>
+          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Account Category</label>
+          <select id="signup-type" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50">
+            <option value="person" class="bg-slate-900 text-white">👤 Individual Commuter / Household</option>
+            <option value="factory" class="bg-slate-900 text-white">🏭 Industrial Plant / Commercial Enterprise</option>
+          </select>
+        </div>
+        <button type="submit" class="w-full btn-gradient text-slate-950 font-extrabold text-sm py-3.5 rounded-xl uppercase tracking-wider mt-2">Register Account</button>
+      </form>
+      <div class="mt-6 text-center">
+        <p class="text-xs text-slate-400">Already registered? <button onclick="navigateTo('signin')" class="text-emerald-400 font-bold hover:underline">Sign In</button></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboard-view" class="hidden relative z-10 min-h-screen pb-16">
+    
+    <!-- Top Glass Navigation Bar -->
+    <header class="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-400 flex items-center justify-center text-slate-950 font-black text-lg shadow-lg shadow-emerald-500/20">
+            🌱
+          </div>
+          <div>
+            <span class="font-extrabold font-display text-lg tracking-tight text-white">EcoCredit <span class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Hub</span></span>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <button onclick="downloadCSV()" class="hidden sm:flex text-xs font-semibold bg-slate-900/80 hover:bg-slate-800 border border-slate-700/80 text-emerald-400 px-3.5 py-2 rounded-xl">📥 Export CSV</button>
+          <button onclick="downloadPDF()" class="text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 px-3.5 py-2 rounded-xl">📜 Certificate</button>
+          <span class="text-xs font-bold px-3 py-1 rounded-lg bg-slate-900 border border-slate-700 text-cyan-400" id="account-type-badge">Person Mode</span>
+          <button onclick="handleLogout()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-900 rounded-xl" title="Sign Out">🚪 Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+      
+      <!-- Metrics Grid -->
+      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        
+        <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Carbon Released</p>
+          <div class="flex items-baseline space-x-1.5 mt-2">
+            <span id="stat-released" class="text-3xl font-extrabold font-display text-rose-400 tracking-tight">0.00</span>
+            <span class="text-xs text-slate-400 font-semibold">kg CO2</span>
+          </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Carbon Avoided</p>
+          <div class="flex items-baseline space-x-1.5 mt-2">
+            <span id="stat-saved" class="text-3xl font-extrabold font-display text-emerald-400 tracking-tight">0.00</span>
+            <span class="text-xs text-slate-400 font-semibold">kg CO2</span>
+          </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl relative overflow-hidden">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400">Net Carbon Credits</p>
+          <div class="flex items-baseline space-x-1.5 mt-2">
+            <span id="stat-credits" class="text-3xl font-extrabold font-display text-cyan-400 tracking-tight">0.00000</span>
+          </div>
+        </div>
+
+        <div class="glass-card p-6 rounded-2xl relative overflow-hidden border-emerald-500/30">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-emerald-400">Trees Needed to Plant</p>
+          <div class="flex items-baseline space-x-1.5 mt-2">
+            <span id="stat-trees-needed" class="text-3xl font-extrabold font-display text-emerald-400 tracking-tight">0</span>
+            <span class="text-xs text-slate-400 font-semibold">Trees 🌲</span>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-2">@ 21.77 kg CO2 absorbed per tree/yr</p>
+        </div>
+
+      </section>
+
+      <!-- Monthly Cap Budget Bar -->
+      <section class="glass-card p-5 rounded-2xl space-y-2">
+        <div class="flex justify-between items-center text-xs font-bold">
+          <span class="text-slate-300">📊 Monthly Carbon Budget Cap (100 kg Maximum Threshold)</span>
+          <span id="budget-status" class="text-emerald-400">0% Utilized</span>
+        </div>
+        <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-800">
+          <div id="budget-bar" class="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+        </div>
+      </section>
+
+      <!-- NEW FEATURE: Major Emission Source & Priority Reduction Target -->
+      <section class="glass-card border-rose-500/30 p-5 rounded-2xl relative overflow-hidden">
+        <div class="absolute left-0 top-0 w-1.5 h-full bg-gradient-to-b from-rose-500 to-amber-500"></div>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pl-2">
+          <div class="flex items-start space-x-4">
+            <span class="text-3xl" id="reduction-target-icon">🎯</span>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-rose-400">Top Reduction Target</h4>
+                <span id="reduction-target-badge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30">Calculating...</span>
+              </div>
+              <p id="reduction-target-advice" class="text-xs text-slate-300 mt-1 font-medium">Log your daily activities to pinpoint your largest carbon contributor and see recommended reduction steps.</p>
+            </div>
+          </div>
+          <div class="bg-slate-900/80 px-4 py-2.5 rounded-xl border border-slate-800 text-right shrink-0">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block">Highest Emission Contributor</span>
+            <span id="reduction-target-stats" class="text-xs font-bold text-amber-400">0.0 kg CO2 (0%)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- AI Smart Recommendation Panel -->
+      <section class="glass-card border-emerald-500/30 p-4 sm:p-5 rounded-2xl flex items-center justify-between relative overflow-hidden">
+        <div class="absolute left-0 top-0 w-1.5 h-full bg-gradient-to-b from-emerald-400 to-cyan-400"></div>
+        <div class="flex items-center space-x-4 pl-2">
+          <span class="text-2xl">🌲</span>
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400">Tree Offset & Environmental Intelligence</h4>
+            <p id="ai-recommendation-text" class="text-xs text-slate-300 mt-0.5">Logging daily activities will automatically compute how many trees you need to plant to reach net-zero.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Main Input & Analytics Grid -->
+      <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- Activity Input Form -->
+        <div class="lg:col-span-5 glass-card p-6 sm:p-7 rounded-3xl space-y-6 shadow-xl">
+          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+            <h2 class="text-base font-bold text-white font-display flex items-center space-x-2">
+              <span class="text-emerald-400">⚡</span> 
+              <span id="form-title">Daily Person Logger</span>
+            </h2>
+          </div>
+
+          <form id="activity-form" onsubmit="handleActivitySubmit(event)" class="space-y-5">
+            
+            <!-- PERSON INPUTS -->
+            <div id="person-inputs" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Primary Transport Mode</label>
+                <select id="person-transport-mode" onchange="calculateLivePreview()" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white">
+                  <option value="bus" class="bg-slate-900 text-white">🚌 Public Transit Bus (+0.089 kg/km)</option>
+                  <option value="gas_car" class="bg-slate-900 text-white">🚗 Gasoline Sedan (+0.210 kg/km)</option>
+                  <option value="diesel_car" class="bg-slate-900 text-white">🚙 Diesel Vehicle (+0.170 kg/km)</option>
+                  <option value="motorcycle" class="bg-slate-900 text-white">🏍️ Motorcycle (+0.103 kg/km)</option>
+                  <option value="train" class="bg-slate-900 text-white">🚆 Electric Metro / Train (+0.035 kg/km)</option>
+                  <option value="ev" class="bg-slate-900 text-white">⚡ Electric Scooter / EV (+0.053 kg/km)</option>
+                  <option value="walk" class="bg-slate-900 text-white">🚲 Bicycle / Walk (0 kg / Saves +0.210 kg/km)</option>
+                </select>
+
+                <div class="mt-4 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+                  <div class="flex justify-between text-xs font-medium mb-2">
+                    <span class="text-slate-400">Distance Travelled Today</span>
+                    <span class="text-emerald-400 font-bold"><span id="val-person-dist">0</span> km</span>
+                  </div>
+                  <input type="range" id="input-person-dist" min="0" max="150" value="0" step="1" oninput="document.getElementById('val-person-dist').innerText=this.value; calculateLivePreview();" class="w-full accent-emerald-500 cursor-pointer"/>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 gap-3">
+                <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                  <div class="flex justify-between text-xs font-medium">
+                    <span class="text-slate-400">Grid Power Consumed</span>
+                    <span class="text-rose-400 font-bold"><span id="val-elec">0</span> kWh</span>
+                  </div>
+                  <input type="range" id="input-elec" min="0" max="40" value="0" step="1" oninput="document.getElementById('val-elec').innerText=this.value; calculateLivePreview();" class="w-full accent-rose-500 cursor-pointer"/>
+                </div>
+
+                <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                  <div class="flex justify-between text-xs font-medium">
+                    <span class="text-slate-400">Solar Power Generated</span>
+                    <span class="text-emerald-400 font-bold"><span id="val-solar">0</span> kWh</span>
+                  </div>
+                  <input type="range" id="input-solar" min="0" max="40" value="0" step="1" oninput="document.getElementById('val-solar').innerText=this.value; calculateLivePreview();" class="w-full accent-emerald-500 cursor-pointer"/>
+                </div>
+
+                <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                  <div class="flex justify-between text-xs font-medium">
+                    <span class="text-slate-400">Daily Waste Generated</span>
+                    <span class="text-amber-400 font-bold"><span id="val-waste">0</span> kg</span>
+                  </div>
+                  <input type="range" id="input-waste" min="0" max="25" value="0" step="0.5" oninput="document.getElementById('val-waste').innerText=this.value; calculateLivePreview();" class="w-full accent-amber-500 cursor-pointer"/>
+                  <p class="text-[10px] text-slate-500">Trash, plastic & organic waste (+1.9 kg CO2/kg)</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- FACTORY INPUTS -->
+            <div id="factory-inputs" class="hidden space-y-4">
+              <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3">
+                <div>
+                  <label class="block text-xs font-semibold text-rose-400 mb-1">Industrial Boiler Coal Consumed (Tons)</label>
+                  <input type="number" id="input-coal" step="0.1" min="0" placeholder="e.g. 2.5" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white"/>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-emerald-400 mb-1">Carbon Capture & Storage CCS (Tons Offset)</label>
+                  <input type="number" id="input-ccs" step="0.1" min="0" placeholder="e.g. 1.0" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white"/>
+                </div>
+              </div>
+            </div>
+
+            <!-- Direct Offset Input -->
+            <div>
+              <label class="block text-xs font-semibold text-cyan-300 mb-1.5">Direct Offset Certificate Purchased (kg CO2)</label>
+              <input type="number" id="input-direct-offset" step="0.1" min="0" placeholder="e.g. 25.0" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white focus:ring-2 focus:ring-cyan-500/50"/>
+            </div>
+
+            <!-- Preview Card with Live Priority Reduction Hint -->
+            <div class="p-4 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 text-xs space-y-2">
+              <div class="flex justify-between items-center text-slate-400">
+                <span>Estimated Release: <strong id="preview-released" class="text-rose-400 font-bold">0.00</strong> kg</span>
+                <span>Estimated Avoided: <strong id="preview-saved" class="text-emerald-400 font-bold">0.00</strong> kg</span>
+              </div>
+              <div class="flex justify-between items-center border-t border-slate-800 pt-2">
+                <span class="text-slate-300 font-semibold">Trees Needed to Plant:</span>
+                <strong id="live-trees-preview" class="text-emerald-400 font-bold">0 Trees</strong>
+              </div>
+              <div class="border-t border-slate-800/80 pt-2 text-[11px] text-amber-300 flex items-center justify-between">
+                <span>⚠️ Primary Today's Release:</span>
+                <strong id="live-highest-source" class="font-bold text-white">None</strong>
+              </div>
+            </div>
+
+            <button type="submit" class="w-full btn-gradient text-slate-950 font-extrabold text-sm py-3.5 rounded-xl uppercase tracking-wider">Save Record to Database</button>
+          </form>
+        </div>
+
+        <!-- Analytics & Leaderboard Grid -->
+        <div class="lg:col-span-7 space-y-6">
+          
+          <div class="glass-card p-6 sm:p-7 rounded-3xl shadow-xl">
+            <h3 class="text-sm font-bold text-white font-display mb-4">Emissions vs Offsets Comparison</h3>
+            <div class="h-60 flex items-center justify-center">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+
+          <div class="glass-card p-6 rounded-3xl shadow-xl">
+            <h3 class="text-sm font-bold text-white font-display mb-4">🏆 Community Eco Leaderboard</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] font-bold">
+                  <tr>
+                    <th class="p-3">Rank</th>
+                    <th class="p-3">User</th>
+                    <th class="p-3">Tier</th>
+                    <th class="p-3">Avoided</th>
+                    <th class="p-3 text-right">Credits Earned</th>
+                  </tr>
+                </thead>
+                <tbody id="leaderboard-body" class="divide-y divide-slate-800/60"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="glass-card p-6 rounded-3xl shadow-xl">
+            <h3 class="text-sm font-bold text-white font-display mb-4">Historical Activity Log</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-slate-900/80 text-slate-400 uppercase text-[10px] font-bold">
+                  <tr>
+                    <th class="p-3">Date</th>
+                    <th class="p-3">Mode</th>
+                    <th class="p-3">Waste (kg)</th>
+                    <th class="p-3">Released</th>
+                    <th class="p-3">Avoided</th>
+                    <th class="p-3">Trees Needed</th>
+                    <th class="p-3 text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="logs-table-body" class="divide-y divide-slate-800/60"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const TRANSPORT_FACTORS = {
+      bus: 0.089, gas_car: 0.210, diesel_car: 0.170, motorcycle: 0.103, train: 0.035, ev: 0.053, walk: 0.000
+    };
+
+    let currentUser = null;
+    let token = null;
+    let chartInstance = null;
+
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-slate-900 border-emerald-500/50 text-emerald-300' : 'bg-slate-900 border-rose-500/50 text-rose-300';
+      toast.className = `pointer-events-auto border backdrop-blur-xl ${bgColor} text-xs font-semibold px-4 py-3 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-3 opacity-0`;
+      toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span> <span>${message}</span>`;
+      container.appendChild(toast);
+      
+      setTimeout(() => toast.classList.remove('translate-y-3', 'opacity-0'), 50);
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      token = localStorage.getItem('jwt_token');
+      currentUser = JSON.parse(localStorage.getItem('user_data'));
+      if (token && currentUser) {
+        setupDashboard();
+      } else {
+        navigateTo('signin');
+      }
+    });
+
+    function navigateTo(viewName) {
+      document.getElementById('signin-view').classList.add('hidden');
+      document.getElementById('signup-view').classList.add('hidden');
+      document.getElementById('dashboard-view').classList.add('hidden');
+      document.getElementById(`${viewName}-view`).classList.remove('hidden');
+    }
+
+    async function handleSignUp(e) {
+      e.preventDefault();
+      const username = document.getElementById('signup-username').value;
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      const accountType = document.getElementById('signup-type').value;
+
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password, accountType })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.error, 'error');
+      } else {
+        showToast(data.message, 'success');
+        setTimeout(() => navigateTo('signin'), 1500);
+      }
+    }
+
+    async function handleSignIn(e) {
+      e.preventDefault();
+      const identifier = document.getElementById('signin-identifier').value;
+      const password = document.getElementById('signin-password').value;
+
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ identifier, password })
+      });
+      const data = await res.json();
+
+      if (!res.ok) {
+        showToast(data.error, 'error');
+      } else {
+        token = data.token;
+        currentUser = data.user;
+        localStorage.setItem('jwt_token', token);
+        localStorage.setItem('user_data', JSON.stringify(currentUser));
+        showToast('Welcome back, ' + currentUser.username + '!', 'success');
+        setupDashboard();
+      }
+    }
+
+    function handleLogout() {
+      localStorage.clear();
+      token = null; currentUser = null;
+      showToast('Signed out successfully.', 'success');
+      navigateTo('signin');
+    }
+
+    function setupDashboard() {
+      document.getElementById('account-type-badge').innerText = currentUser.accountType === 'factory' ? 'Industrial Mode' : 'Commuter Mode';
+      
+      if (currentUser.accountType === 'factory') {
+        document.getElementById('person-inputs').classList.add('hidden');
+        document.getElementById('factory-inputs').classList.remove('hidden');
+        document.getElementById('form-title').innerText = 'Industrial Plant Logger';
+      } else {
+        document.getElementById('person-inputs').classList.remove('hidden');
+        document.getElementById('factory-inputs').classList.add('hidden');
+        document.getElementById('form-title').innerText = 'Daily Person Logger';
+      }
+
+      navigateTo('dashboard');
+      loadLogsFromDatabase();
+      loadLeaderboard();
+    }
+
+    function calculateLivePreview() {
+      let released = 0, saved = 0;
+      let transportCO2 = 0, powerCO2 = 0, wasteCO2 = 0;
+
+      if (currentUser.accountType === 'person') {
+        const mode = document.getElementById('person-transport-mode').value;
+        const dist = parseFloat(document.getElementById('input-person-dist').value) || 0;
+        const elec = parseFloat(document.getElementById('input-elec').value) || 0;
+        const solar = parseFloat(document.getElementById('input-solar').value) || 0;
+        const waste = parseFloat(document.getElementById('input-waste').value) || 0;
+
+        transportCO2 = dist * TRANSPORT_FACTORS[mode];
+        powerCO2 = elec * 0.82;
+        wasteCO2 = waste * 1.9;
+
+        released += transportCO2 + powerCO2 + wasteCO2;
+        saved += (mode === 'walk' ? dist * 0.210 : 0) + (solar * 0.82);
+      } else {
+        const coal = parseFloat(document.getElementById('input-coal').value) || 0;
+        const ccs = parseFloat(document.getElementById('input-ccs').value) || 0;
+
+        released += coal * 2420;
+        saved += ccs * 1000;
+      }
+
+      const directOffset = parseFloat(document.getElementById('input-direct-offset').value) || 0;
+      saved += directOffset;
+
+      const liveTreesNeeded = Math.ceil(released / 21.77);
+
+      document.getElementById('preview-released').innerText = released.toFixed(2);
+      document.getElementById('preview-saved').innerText = saved.toFixed(2);
+      document.getElementById('live-trees-preview').innerText = `${liveTreesNeeded} Tree(s)`;
+
+      // Live hint for highest current input
+      if (currentUser.accountType === 'person') {
+        const liveSources = [
+          { name: 'Transport', val: transportCO2 },
+          { name: 'Grid Power', val: powerCO2 },
+          { name: 'Waste', val: wasteCO2 }
+        ];
+        liveSources.sort((a, b) => b.val - a.val);
+
+        if (liveSources[0].val > 0) {
+          document.getElementById('live-highest-source').innerText = `${liveSources[0].name} (${liveSources[0].val.toFixed(2)} kg)`;
+        } else {
+          document.getElementById('live-highest-source').innerText = 'None';
+        }
+      }
+
+      return { released, saved };
+    }
+
+    async function handleActivitySubmit(e) {
+      e.preventDefault();
+      const { released, saved } = calculateLivePreview();
+
+      const transportMode = currentUser.accountType === 'person' ? document.getElementById('person-transport-mode').value : 'industrial';
+      const transportDistance = currentUser.accountType === 'person' ? parseFloat(document.getElementById('input-person-dist').value) || 0 : 0;
+      const gridPowerKwh = currentUser.accountType === 'person' ? parseFloat(document.getElementById('input-elec').value) || 0 : 0;
+      const solarPowerKwh = currentUser.accountType === 'person' ? parseFloat(document.getElementById('input-solar').value) || 0 : 0;
+      const wasteKg = currentUser.accountType === 'person' ? parseFloat(document.getElementById('input-waste').value) || 0 : 0;
+      const offsetKg = parseFloat(document.getElementById('input-direct-offset').value) || 0;
+
+      const res = await fetch('/api/logs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ 
+          accountType: currentUser.accountType, 
+          transportMode, 
+          transportDistance, 
+          gridPowerKwh,
+          solarPowerKwh,
+          wasteKg, 
+          offsetKg,
+          releasedKg: released, 
+          savedKg: saved 
+        })
+      });
+
+      if (res.ok) {
+        showToast('Activity log synced to database!', 'success');
+        document.getElementById('activity-form').reset();
+        document.getElementById('val-person-dist').innerText = '0';
+        document.getElementById('val-elec').innerText = '0';
+        document.getElementById('val-solar').innerText = '0';
+        document.getElementById('val-waste').innerText = '0';
+        calculateLivePreview();
+        loadLogsFromDatabase();
+        loadLeaderboard();
+      } else {
+        showToast('Failed to save activity.', 'error');
+      }
+    }
+
+    async function loadLogsFromDatabase() {
+      const res = await fetch('/api/logs', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const logs = await res.json();
+
+      let totalReleased = 0, totalSaved = 0, totalNetSaved = 0, totalCredits = 0;
+      let totalTransportCO2 = 0, totalPowerCO2 = 0, totalWasteCO2 = 0;
+
+      const tableBody = document.getElementById('logs-table-body');
+      tableBody.innerHTML = '';
+
+      logs.forEach(log => {
+        totalReleased += log.releasedKg;
+        totalSaved += log.savedKg;
+        totalNetSaved += log.netSavedKg;
+        totalCredits += log.creditsEarned;
+
+        // Categorized emissions tracking
+        const tDist = log.transportDistance || 0;
+        const tFactor = TRANSPORT_FACTORS[log.transportMode] || 0;
+        totalTransportCO2 += (tDist * tFactor);
+        totalPowerCO2 += ((log.gridPowerKwh || 0) * 0.82);
+        totalWasteCO2 += ((log.wasteKg || 0) * 1.9);
+
+        const rowTrees = log.treesNeeded || Math.ceil(log.releasedKg / 21.77);
+
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-900/40 transition-colors';
+        row.innerHTML = `
+          <td class="p-3 font-mono text-[11px]">${new Date(log.date).toLocaleDateString()}</td>
+          <td class="p-3 font-medium text-emerald-400 capitalize">${log.transportMode}</td>
+          <td class="p-3 font-semibold text-amber-400">${log.wasteKg || 0} kg</td>
+          <td class="p-3 text-rose-400 font-semibold">${log.releasedKg} kg</td>
+          <td class="p-3 text-emerald-400 font-semibold">${log.savedKg} kg</td>
+          <td class="p-3 text-emerald-400 font-bold">${rowTrees} Trees 🌲</td>
+          <td class="p-3 text-right"><button onclick="deleteLog('${log._id}')" class="text-slate-500 hover:text-rose-400 font-semibold">Delete</button></td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      const totalTreesNeeded = Math.ceil(totalReleased / 21.77);
+
+      document.getElementById('stat-released').innerText = totalReleased.toFixed(2);
+      document.getElementById('stat-saved').innerText = totalSaved.toFixed(2);
+      document.getElementById('stat-credits').innerText = totalCredits.toFixed(5);
+      document.getElementById('stat-trees-needed').innerText = totalTreesNeeded;
+
+      // Update Priority Reduction Target Card
+      updateReductionTargetUI(totalTransportCO2, totalPowerCO2, totalWasteCO2, totalReleased);
+
+      // Monthly Budget Bar (Cap = 100kg CO2)
+      const budgetCap = 100;
+      const budgetPercent = Math.min((totalReleased / budgetCap) * 100, 100);
+      const budgetBar = document.getElementById('budget-bar');
+      budgetBar.style.width = `${budgetPercent}%`;
+      
+      if (budgetPercent > 80) {
+        budgetBar.className = "bg-rose-500 h-full rounded-full transition-all duration-500";
+        document.getElementById('budget-status').innerText = `${budgetPercent.toFixed(0)}% Utilized (High Emissions Warning)`;
+        document.getElementById('budget-status').className = "text-rose-400 font-bold";
+      } else {
+        budgetBar.className = "bg-gradient-to-r from-emerald-500 to-cyan-400 h-full rounded-full transition-all duration-500";
+        document.getElementById('budget-status').innerText = `${budgetPercent.toFixed(0)}% Utilized`;
+        document.getElementById('budget-status').className = "text-emerald-400 font-bold";
+      }
+
+      if (totalTreesNeeded > 0) {
+        document.getElementById('ai-recommendation-text').innerText = `🌲 Tree Action Plan: You need to plant approximately ${totalTreesNeeded} mature tree(s) to completely offset your accumulated ${totalReleased.toFixed(1)} kg of CO2 emissions!`;
+      } else {
+        document.getElementById('ai-recommendation-text').innerText = '🎉 Exceptional Offsetting: Your clean savings outweigh gross footprint!';
+      }
+
+      renderChart(totalReleased, totalSaved);
+    }
+
+    function updateReductionTargetUI(transportCO2, powerCO2, wasteCO2, totalReleased) {
+      const categories = [
+        { 
+          id: 'power',
+          name: 'Grid Electricity Usage', 
+          val: powerCO2, 
+          icon: '⚡',
+          advice: 'Switch to LED bulbs, turn off unused electronics, and increase solar panel usage to lower grid demand.' 
+        },
+        { 
+          id: 'transport',
+          name: 'Daily Transportation', 
+          val: transportCO2, 
+          icon: '🚗',
+          advice: 'Try walking/biking for short trips or take public transit 2 days a week to cut transport emissions by up to 40%.' 
+        },
+        { 
+          id: 'waste',
+          name: 'Solid Household Waste', 
+          val: wasteCO2, 
+          icon: '🗑️',
+          advice: 'Compost organic kitchen waste and avoid single-use plastics to reduce landfill methane emissions.' 
+        }
+      ];
+
+      categories.sort((a, b) => b.val - a.val);
+      const topTarget = categories[0];
+
+      if (totalReleased > 0 && topTarget.val > 0) {
+        const percent = ((topTarget.val / totalReleased) * 100).toFixed(0);
+        document.getElementById('reduction-target-icon').innerText = topTarget.icon;
+        document.getElementById('reduction-target-badge').innerText = `Priority #1: ${topTarget.name}`;
+        document.getElementById('reduction-target-advice').innerText = topTarget.advice;
+        document.getElementById('reduction-target-stats').innerText = `${topTarget.val.toFixed(1)} kg CO2 (${percent}%)`;
+      } else {
+        document.getElementById('reduction-target-icon').innerText = '🌱';
+        document.getElementById('reduction-target-badge').innerText = 'Zero Footprint Detected';
+        document.getElementById('reduction-target-advice').innerText = 'Great job! You have no logged emissions needing reduction right now.';
+        document.getElementById('reduction-target-stats').innerText = '0.0 kg CO2 (0%)';
+      }
+    }
+
+    async function loadLeaderboard() {
+      const res = await fetch('/api/leaderboard');
+      const data = await res.json();
+      const body = document.getElementById('leaderboard-body');
+      body.innerHTML = '';
+
+      data.forEach((user, index) => {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-slate-900/40 transition-colors';
+        row.innerHTML = `
+          <td class="p-3 font-bold">${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}</td>
+          <td class="p-3 font-semibold text-white">${user.username}</td>
+          <td class="p-3 uppercase text-[10px] text-slate-400">${user.accountType}</td>
+          <td class="p-3 text-emerald-400 font-semibold">${user.totalSaved.toFixed(1)} kg</td>
+          <td class="p-3 text-right text-cyan-400 font-bold font-mono">${user.totalCredits.toFixed(5)}</td>
+        `;
+        body.appendChild(row);
+      });
+    }
+
+    async function deleteLog(id) {
+      await fetch(`/api/logs/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      showToast('Record deleted.', 'success');
+      loadLogsFromDatabase();
+      loadLeaderboard();
+    }
+
+    function downloadCSV() {
+      window.open(`/api/export/csv?token=${token}`, '_blank');
+      showToast('Generating CSV report...', 'success');
+    }
+
+    function downloadPDF() {
+      showToast('Compiling official PDF Certificate...', 'success');
+      fetch('/api/export/certificate', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.blob())
+      .then(blob => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Carbon_Certificate_${currentUser.username}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      });
+    }
+
+    function renderChart(released, saved) {
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+
+      const gradient1 = ctx.createLinearGradient(0, 0, 0, 200);
+      gradient1.addColorStop(0, '#f43f5e');
+      gradient1.addColorStop(1, '#e11d48');
+
+      const gradient2 = ctx.createLinearGradient(0, 0, 0, 200);
+      gradient2.addColorStop(0, '#22c55e');
+      gradient2.addColorStop(1, '#06b6d4');
+
+      chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Gross Released (kg)', 'Clean Avoided (kg)'],
+          datasets: [{ data: [released, saved], backgroundColor: [gradient1, gradient2], borderRadius: 12, barThickness: 45 }]
+        },
+        options: { 
+          responsive: true, 
+          maintainAspectRatio: false, 
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } },
+            y: { grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8', font: { family: 'Inter', size: 11 } } }
+          }
+        }
+      });
+    }
+  </script>
+</body>
+</html>
