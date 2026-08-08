@@ -7,7 +7,6 @@ const path = require('path');
 const PDFDocument = require('pdfkit');
 const dns = require('dns');
 
-// Force Node.js DNS resolution to Google DNS to prevent SRV connection errors
 try {
   dns.setServers(['8.8.8.8', '8.8.4.4']);
   console.log('🌐 Node DNS set to Google Public DNS (8.8.8.8)');
@@ -53,17 +52,14 @@ const UserSchema = new mongoose.Schema({
 const CarbonLogSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   accountType: { type: String, enum: ['person', 'factory'], required: true },
-  // Person metrics
   transportMode: { type: String, default: 'none' },
   transportDistance: { type: Number, default: 0 },
   gridPowerKwh: { type: Number, default: 0 },
   solarPowerKwh: { type: Number, default: 0 },
   wasteKg: { type: Number, default: 0 },
-  // Factory metrics
   coalTons: { type: Number, default: 0 },
   hazardousWasteKg: { type: Number, default: 0 },
   solidWasteKg: { type: Number, default: 0 },
-  // Calculated Totals
   offsetKg: { type: Number, default: 0 },
   releasedKg: { type: Number, required: true },
   savedKg: { type: Number, required: true },
@@ -203,6 +199,46 @@ app.delete('/api/logs/:id', authenticateToken, async (req, res) => {
     res.json({ message: 'Log deleted successfully.' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete log entry.' });
+  }
+});
+
+// --- AI SUSTAINABILITY ADVISOR ENDPOINT ---
+app.post('/api/ai-advisor', authenticateToken, async (req, res) => {
+  try {
+    const { userQuery } = req.body;
+    const logs = await CarbonLog.find({ userId: req.user.id }).sort({ date: -1 }).limit(5);
+
+    const userType = req.user.accountType;
+    let totalReleased = 0;
+    let totalSaved = 0;
+
+    logs.forEach(log => {
+      totalReleased += log.releasedKg;
+      totalSaved += log.savedKg;
+    });
+
+    // Rule-Based Intelligence Engine (Instant personalized advice fallback)
+    let advice = "";
+
+    if (userType === 'factory') {
+      advice = `Hello ${req.user.username}! Based on your recent industrial logs (Total Released: ${totalReleased.toFixed(1)} kg CO2):\n\n` +
+        `1. 🏭 **Boiler Efficiency:** Consider shifting a portion of coal boiler fuel to biomass co-firing to reduce gross CO2 factors.\n` +
+        `2. ⚠️ **Hazardous Waste:** Your chemical/hazardous waste releases 2.5 kg CO2 per kg. Transitioning to closed-loop chemical recycling can lower this footprint by up to 40%.\n` +
+        `3. ♻️ **Solid Waste Stream:** Partner with industrial waste aggregators to redirect slag and metallic scrap away from landfills.`;
+    } else {
+      advice = `Hi ${req.user.username}! Here is your personalized eco-strategy based on your recent activity (Total Released: ${totalReleased.toFixed(1)} kg CO2):\n\n` +
+        `1. 🚲 **Commute Optimization:** Replacing just 2 car trips per week with walking or cycling saves roughly 4.2 kg of CO2.\n` +
+        `2. ⚡ **Energy Conservation:** Off-grid solar adoption or switching to LED lighting can cut grid electricity footprint by 15-20%.\n` +
+        `3. ♻️ **Waste Management:** Composting organic waste prevents methane generation and avoids 1.9 kg CO2 per kg logged.`;
+    }
+
+    if (userQuery && userQuery.trim() !== '') {
+      advice += `\n\n💡 **Regarding your question ("${userQuery}"):** Focus on small daily incremental changes—tracking daily entries is the fastest way to hit net-zero targets!`;
+    }
+
+    res.json({ advice });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to generate AI advice.' });
   }
 });
 

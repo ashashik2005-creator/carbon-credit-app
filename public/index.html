@@ -198,6 +198,26 @@
         </div>
       </section>
 
+      <!-- FEATURE: AI Sustainability Advisor -->
+      <section class="glass-card p-6 rounded-3xl border-emerald-500/30 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <span class="text-xl">🤖</span>
+            <h3 class="text-sm font-bold text-white font-display">AI Sustainability Advisor</h3>
+          </div>
+          <button onclick="requestAIAdvice()" class="text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded-xl hover:bg-emerald-500/30 transition-all">✨ Generate Advice</button>
+        </div>
+
+        <div id="ai-response-box" class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 text-xs text-slate-300 whitespace-pre-line leading-relaxed min-h-[80px]">
+          Click "Generate Advice" to receive personalized strategies based on your historical carbon footprint.
+        </div>
+
+        <div class="flex gap-2">
+          <input type="text" id="ai-user-query" placeholder="Ask AI Advisor a question (e.g., 'How can I offset my vehicle emissions?')" class="flex-1 glass-input rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+          <button onclick="requestAIAdvice()" class="btn-gradient text-slate-950 font-bold text-xs px-4 py-2 rounded-xl">Ask AI</button>
+        </div>
+      </section>
+
       <!-- Gamification & Badges Showcase -->
       <section class="glass-card p-5 rounded-2xl space-y-3">
         <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center space-x-1">
@@ -464,6 +484,31 @@
       navigateTo('dashboard');
       loadLogsFromDatabase();
       loadLeaderboard();
+    }
+
+    async function requestAIAdvice() {
+      const responseBox = document.getElementById('ai-response-box');
+      const userQuery = document.getElementById('ai-user-query').value;
+      
+      responseBox.innerText = '🤖 Analyzing recent carbon footprint trends... Please wait...';
+
+      try {
+        const res = await fetch('/api/ai-advisor', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({ userQuery })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          responseBox.innerText = data.advice;
+          document.getElementById('ai-user-query').value = '';
+        } else {
+          responseBox.innerText = '⚠️ Unable to fetch advice at this time. Please try again.';
+        }
+      } catch (err) {
+        responseBox.innerText = '⚠️ Error connecting to AI Sustainability Advisor service.';
+      }
     }
 
     function updateMonthlyBudgetCap(val) {
