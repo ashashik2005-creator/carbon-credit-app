@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EcoCredit Hub — Modern Carbon Intelligence Platform</title>
+  <title>EcoCredit Hub — Next-Gen Carbon Intelligence</title>
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -17,110 +17,149 @@
       darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: { sans: ['Inter', 'sans-serif'], display: ['Plus Jakarta Sans', 'sans-serif'] }
+          fontFamily: { 
+            sans: ['Plus Jakarta Sans', 'sans-serif'], 
+            display: ['Space Grotesk', 'sans-serif'] 
+          },
+          colors: {
+            brand: { 50: '#ecfdf5', 400: '#34d399', 500: '#10b981', 900: '#064e3b' },
+            cyber: { cyan: '#06b6d4', violet: '#a855f7', dark: '#030712' }
+          }
         }
       }
     }
   </script>
   
   <style>
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.2); border-radius: 9999px; }
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #030712; }
+    ::-webkit-scrollbar-thumb { background: rgba(52, 211, 153, 0.2); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(52, 211, 153, 0.5); }
 
-    .glass-card {
-      background: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+    body {
+      background-color: #030712;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(6, 182, 212, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(168, 85, 247, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
     }
-    .glass-input {
-      background: rgba(30, 41, 59, 0.7);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+
+    .neo-glass {
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
     }
-    .btn-gradient {
-      background: linear-gradient(135deg, #22c55e 0%, #06b6d4 100%);
-      box-shadow: 0 4px 20px -5px rgba(34, 197, 94, 0.4);
+
+    .neo-glass-hover {
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .btn-gradient:hover {
-      box-shadow: 0 8px 25px -5px rgba(34, 197, 94, 0.6);
+    .neo-glass-hover:hover {
+      border-color: rgba(52, 211, 153, 0.3);
+      box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.25);
+      transform: translateY(-2px);
+    }
+
+    .glass-input {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+    }
+    .glass-input:focus {
+      border-color: #34d399;
+      box-shadow: 0 0 15px rgba(52, 211, 153, 0.2);
+    }
+
+    .btn-cyber {
+      background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+      box-shadow: 0 4px 25px -5px rgba(16, 185, 129, 0.5);
+      transition: all 0.3s ease;
+    }
+    .btn-cyber:hover {
+      box-shadow: 0 8px 30px -2px rgba(6, 182, 212, 0.6);
       transform: translateY(-1px);
     }
-    input[type=range] { -webkit-appearance: none; background: rgba(148, 163, 184, 0.2); border-radius: 8px; }
+
+    input[type=range] { -webkit-appearance: none; background: rgba(255, 255, 255, 0.08); border-radius: 9999px; height: 6px; }
     input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
-      background: #22c55e; cursor: pointer; box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+      -webkit-appearance: none; height: 20px; width: 20px; border-radius: 50%;
+      background: #34d399; cursor: pointer; box-shadow: 0 0 12px #34d399;
+      transition: transform 0.1s ease;
     }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100 font-sans min-h-screen relative overflow-x-hidden">
+<body class="text-slate-100 font-sans min-h-screen relative overflow-x-hidden selection:bg-brand-500 selection:text-slate-950">
 
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
   <!-- SIGN-IN VIEW -->
   <div id="signin-view" class="relative z-10 min-h-screen flex items-center justify-center p-4">
-    <div class="glass-card p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md">
+    <div class="neo-glass p-8 sm:p-10 rounded-3xl w-full max-w-md relative overflow-hidden">
+      <div class="absolute -top-12 -right-12 w-32 h-32 bg-brand-500/20 rounded-full blur-3xl pointer-events-none"></div>
+      
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-500/20 to-cyan-500/20 text-emerald-400 border border-emerald-500/30 mb-4 shadow-inner">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-500/20 to-cyber-cyan/20 text-brand-400 border border-brand-500/30 mb-4 shadow-inner">
           🌱
         </div>
-        <h1 class="text-3xl font-extrabold font-display text-white">EcoCredit <span class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Hub</span></h1>
-        <p class="text-slate-400 text-xs mt-1.5 font-medium">Next-Generation Carbon Intelligence Platform</p>
+        <h1 class="text-3xl font-extrabold font-display tracking-tight text-white">EcoCredit <span class="bg-gradient-to-r from-brand-400 via-cyber-cyan to-cyber-violet bg-clip-text text-transparent">Hub</span></h1>
+        <p class="text-slate-400 text-xs mt-2 font-medium tracking-wide">Autonomous Carbon Intelligence Platform</p>
       </div>
 
       <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-5">
         <div>
-          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Username or Email</label>
-          <input type="text" id="signin-identifier" required placeholder="name@company.com" class="w-full glass-input rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Identifier</label>
+          <input type="text" id="signin-identifier" required placeholder="username or email" class="w-full glass-input rounded-xl px-4 py-3 text-sm text-white focus:outline-none"/>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1.5">Password</label>
-          <input type="password" id="signin-password" required placeholder="••••••••" class="w-full glass-input rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Access Pass</label>
+          <input type="password" id="signin-password" required placeholder="••••••••" class="w-full glass-input rounded-xl px-4 py-3 text-sm text-white focus:outline-none"/>
         </div>
-        <button type="submit" class="w-full btn-gradient text-slate-950 font-extrabold text-sm py-3.5 rounded-xl uppercase tracking-wider">Sign In to Dashboard</button>
+        <button type="submit" class="w-full btn-cyber text-slate-950 font-black text-xs py-3.5 rounded-xl uppercase tracking-widest mt-2">Initialize Workspace</button>
       </form>
       
-      <div class="mt-8 pt-6 border-t border-slate-800 text-center">
-        <p class="text-xs text-slate-400">New to EcoCredit Hub? <button onclick="navigateTo('signup')" class="text-emerald-400 font-bold hover:text-emerald-300">Create an Account</button></p>
+      <div class="mt-8 pt-6 border-t border-slate-800/80 text-center">
+        <p class="text-xs text-slate-400">New to Platform? <button onclick="navigateTo('signup')" class="text-brand-400 font-bold hover:underline">Create ID</button></p>
       </div>
     </div>
   </div>
 
   <!-- SIGN-UP VIEW -->
   <div id="signup-view" class="hidden relative z-10 min-h-screen flex items-center justify-center p-4">
-    <div class="glass-card p-8 sm:p-10 rounded-3xl shadow-2xl w-full max-w-md">
+    <div class="neo-glass p-8 sm:p-10 rounded-3xl w-full max-w-md relative overflow-hidden">
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-tr from-cyan-500/20 to-emerald-500/20 text-cyan-400 border border-cyan-500/30 mb-4 shadow-inner">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyber-cyan/20 to-cyber-violet/20 text-cyber-cyan border border-cyber-cyan/30 mb-4 shadow-inner">
           🌍
         </div>
-        <h1 class="text-3xl font-extrabold font-display text-white">Join the Movement</h1>
+        <h1 class="text-2xl font-extrabold font-display text-white">Deploy Account</h1>
       </div>
 
       <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-4">
         <div>
-          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Username</label>
-          <input type="text" id="signup-username" required placeholder="ashik_dev" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Username</label>
+          <input type="text" id="signup-username" required placeholder="ashik_dev" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none"/>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Email Address</label>
-          <input type="email" id="signup-email" required placeholder="ashik@example.com" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Email Endpoint</label>
+          <input type="email" id="signup-email" required placeholder="ashik@example.com" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none"/>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Password</label>
-          <input type="password" id="signup-password" required minlength="6" placeholder="••••••••" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50"/>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Security Token</label>
+          <input type="password" id="signup-password" required minlength="6" placeholder="••••••••" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none"/>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Account Category</label>
-          <select id="signup-type" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white">
-            <option value="person" class="bg-slate-900 text-white">👤 Individual Commuter / Household</option>
-            <option value="factory" class="bg-slate-900 text-white">🏭 Industrial Plant / Commercial Enterprise</option>
+          <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Entity Scope</label>
+          <select id="signup-type" class="w-full glass-input rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none">
+            <option value="person" class="bg-slate-950 text-white">👤 Commuter / Household Scope</option>
+            <option value="factory" class="bg-slate-950 text-white">🏭 Industrial Facility Scope</option>
           </select>
         </div>
-        <button type="submit" class="w-full btn-gradient text-slate-950 font-extrabold text-sm py-3.5 rounded-xl uppercase tracking-wider mt-2">Register Account</button>
+        <button type="submit" class="w-full btn-cyber text-slate-950 font-black text-xs py-3.5 rounded-xl uppercase tracking-widest mt-2">Register Workspace</button>
       </form>
       <div class="mt-6 text-center">
-        <p class="text-xs text-slate-400">Already registered? <button onclick="navigateTo('signin')" class="text-emerald-400 font-bold hover:underline">Sign In</button></p>
+        <p class="text-xs text-slate-400">Registered? <button onclick="navigateTo('signin')" class="text-brand-400 font-bold hover:underline">Sign In</button></p>
       </div>
     </div>
   </div>
@@ -128,21 +167,24 @@
   <!-- DASHBOARD VIEW -->
   <div id="dashboard-view" class="hidden relative z-10 min-h-screen pb-16">
     
-    <header class="border-b border-slate-800 bg-slate-950/70 backdrop-blur-xl sticky top-0 z-40">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between">
+    <header class="border-b border-slate-800/80 bg-slate-950/60 backdrop-blur-2xl sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-400 flex items-center justify-center text-slate-950 font-black text-lg">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-500 to-cyber-cyan flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-brand-500/20">
             🌱
           </div>
-          <span class="font-extrabold font-display text-lg text-white">EcoCredit <span class="bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">Hub</span></span>
+          <div>
+            <span class="font-extrabold font-display text-xl text-white tracking-tight">EcoCredit <span class="bg-gradient-to-r from-brand-400 to-cyber-cyan bg-clip-text text-transparent">Hub</span></span>
+            <span class="block text-[9px] font-mono text-slate-500 uppercase tracking-widest">v2.6 Enterprise</span>
+          </div>
         </div>
 
         <div class="flex items-center space-x-2 sm:space-x-3">
-          <span id="account-type-badge" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-cyan-400 uppercase">Commuter Mode</span>
-          <button onclick="downloadCSV()" class="hidden sm:flex text-xs font-semibold bg-slate-900 border border-slate-700 text-emerald-400 px-3 py-2 rounded-xl">📥 CSV</button>
-          <button onclick="downloadPDF()" class="text-xs font-semibold bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 px-3 py-2 rounded-xl">📜 Certificate</button>
-          <button onclick="downloadMonthlyPDF()" class="text-xs font-semibold bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 px-3 py-2 rounded-xl">📊 Monthly PDF</button>
-          <button onclick="handleLogout()" class="p-2 text-slate-400 hover:text-rose-400" title="Sign Out">🚪</button>
+          <span id="account-type-badge" class="text-[10px] font-mono font-bold px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-700 text-cyber-cyan uppercase tracking-wider">Commuter Mode</span>
+          <button onclick="downloadCSV()" class="hidden sm:flex text-xs font-bold bg-slate-900 border border-slate-800 text-brand-400 px-3 py-2 rounded-xl hover:bg-slate-800 transition">📥 CSV</button>
+          <button onclick="downloadPDF()" class="text-xs font-bold bg-brand-500/10 border border-brand-500/30 text-brand-300 px-3 py-2 rounded-xl hover:bg-brand-500/20 transition">📜 Cert</button>
+          <button onclick="downloadMonthlyPDF()" class="text-xs font-bold bg-cyber-cyan/10 border border-cyber-cyan/30 text-cyber-cyan px-3 py-2 rounded-xl hover:bg-cyber-cyan/20 transition">📊 Analytics</button>
+          <button onclick="handleLogout()" class="p-2 text-slate-400 hover:text-rose-400 transition" title="Sign Out">🚪</button>
         </div>
       </div>
     </header>
@@ -151,81 +193,85 @@
       
       <!-- Metrics Grid -->
       <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div class="glass-card p-6 rounded-2xl">
-          <p class="text-[11px] font-bold uppercase text-slate-400">Carbon Released</p>
-          <div class="flex items-baseline space-x-1.5 mt-2">
-            <span id="stat-released" class="text-3xl font-extrabold text-rose-400">0.00</span>
+        <div class="neo-glass neo-glass-hover p-6 rounded-3xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-4 opacity-10 text-rose-500 font-display font-black text-6xl pointer-events-none">CO2</div>
+          <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">Carbon Released</p>
+          <div class="flex items-baseline space-x-1.5 mt-3">
+            <span id="stat-released" class="text-4xl font-extrabold font-display text-rose-400">0.00</span>
             <span class="text-xs text-slate-400 font-semibold">kg CO2</span>
           </div>
         </div>
 
-        <div class="glass-card p-6 rounded-2xl">
-          <p class="text-[11px] font-bold uppercase text-slate-400">Carbon Avoided</p>
-          <div class="flex items-baseline space-x-1.5 mt-2">
-            <span id="stat-saved" class="text-3xl font-extrabold text-emerald-400">0.00</span>
+        <div class="neo-glass neo-glass-hover p-6 rounded-3xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-4 opacity-10 text-brand-400 font-display font-black text-6xl pointer-events-none">SAVED</div>
+          <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">Carbon Avoided</p>
+          <div class="flex items-baseline space-x-1.5 mt-3">
+            <span id="stat-saved" class="text-4xl font-extrabold font-display text-brand-400">0.00</span>
             <span class="text-xs text-slate-400 font-semibold">kg CO2</span>
           </div>
         </div>
 
-        <div class="glass-card p-6 rounded-2xl">
-          <p class="text-[11px] font-bold uppercase text-slate-400">Net Carbon Credits</p>
-          <div class="flex items-baseline space-x-1.5 mt-2">
-            <span id="stat-credits" class="text-3xl font-extrabold text-cyan-400">0.00000</span>
+        <div class="neo-glass neo-glass-hover p-6 rounded-3xl relative overflow-hidden">
+          <div class="absolute top-0 right-0 p-4 opacity-10 text-cyber-cyan font-display font-black text-6xl pointer-events-none">CREDIT</div>
+          <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">Net Carbon Credits</p>
+          <div class="flex items-baseline space-x-1.5 mt-3">
+            <span id="stat-credits" class="text-3xl font-extrabold font-mono text-cyber-cyan">0.00000</span>
           </div>
         </div>
 
-        <div class="glass-card p-6 rounded-2xl border-emerald-500/30">
-          <p class="text-[11px] font-bold uppercase text-emerald-400">Trees Needed to Plant</p>
-          <div class="flex items-baseline space-x-1.5 mt-2">
-            <span id="stat-trees-needed" class="text-3xl font-extrabold text-emerald-400">0</span>
+        <div class="neo-glass neo-glass-hover p-6 rounded-3xl relative overflow-hidden border-brand-500/30">
+          <div class="absolute top-0 right-0 p-4 opacity-10 text-brand-400 font-display font-black text-6xl pointer-events-none">TREE</div>
+          <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-brand-400">Trees Offset Demand</p>
+          <div class="flex items-baseline space-x-1.5 mt-3">
+            <span id="stat-trees-needed" class="text-4xl font-extrabold font-display text-brand-400">0</span>
             <span class="text-xs text-slate-400 font-semibold">Trees 🌲</span>
           </div>
         </div>
       </section>
 
       <!-- Custom Monthly Budget Limit Input & Progress Bar -->
-      <section class="glass-card p-5 rounded-2xl space-y-3">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 text-xs font-bold">
-          <div class="flex items-center space-x-2">
-            <span class="text-slate-300">📊 Custom Monthly Carbon Budget Cap:</span>
-            <input type="number" id="custom-budget-input" value="100" min="10" step="10" onchange="updateMonthlyBudgetCap(this.value)" class="w-20 glass-input rounded-lg px-2 py-1 text-xs text-emerald-400 font-bold focus:outline-none"/>
+      <section class="neo-glass p-6 rounded-3xl space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs font-bold">
+          <div class="flex items-center space-x-3">
+            <span class="text-slate-300 font-display tracking-wide">📊 Monthly Carbon Target Cap:</span>
+            <input type="number" id="custom-budget-input" value="100" min="10" step="10" onchange="updateMonthlyBudgetCap(this.value)" class="w-24 glass-input rounded-xl px-3 py-1.5 text-xs text-brand-400 font-mono font-bold focus:outline-none text-center"/>
             <span class="text-slate-400">kg CO2</span>
           </div>
-          <span id="budget-status" class="text-emerald-400">0% Utilized</span>
+          <span id="budget-status" class="text-brand-400 font-mono">0% Utilized</span>
         </div>
-        <div class="w-full bg-slate-900 rounded-full h-2.5 overflow-hidden border border-slate-800">
-          <div id="budget-bar" class="bg-gradient-to-r from-emerald-500 to-cyan-400 h-full rounded-full transition-all duration-700" style="width: 0%"></div>
+        <div class="w-full bg-slate-950/80 rounded-full h-3 overflow-hidden p-0.5 border border-slate-800">
+          <div id="budget-bar" class="bg-gradient-to-r from-brand-500 via-cyber-cyan to-cyber-violet h-full rounded-full transition-all duration-700 shadow-lg shadow-brand-500/50" style="width: 0%"></div>
         </div>
       </section>
 
       <!-- FEATURE: Sustainability Advisor Section -->
-      <section class="glass-card p-6 rounded-3xl border-emerald-500/30 space-y-3">
+      <section class="neo-glass p-6 rounded-3xl border-brand-500/30 space-y-3 relative overflow-hidden">
         <div class="flex items-center space-x-2">
-          <span class="text-xl">💡</span>
-          <h3 class="text-sm font-bold text-white font-display">Personalized Sustainability Advisor</h3>
+          <span class="text-2xl">💡</span>
+          <h3 class="text-sm font-bold text-white font-display uppercase tracking-wider">Automated Sustainability Advisor</h3>
         </div>
 
-        <div id="advisor-response-box" class="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 text-xs text-slate-300 whitespace-pre-line leading-relaxed">
-          Loading personalized sustainability strategies...
+        <div id="advisor-response-box" class="bg-slate-950/70 p-5 rounded-2xl border border-slate-800 text-xs text-slate-300 whitespace-pre-line leading-relaxed font-sans">
+          Initializing personalized footprint assessment...
         </div>
       </section>
 
       <!-- Gamification & Badges Showcase -->
-      <section class="glass-card p-5 rounded-2xl space-y-3">
-        <h4 class="text-xs font-bold uppercase tracking-wider text-cyan-400 flex items-center space-x-1">
-          <span>🏆 Eco Achievements & Badges Unlocked</span>
+      <section class="neo-glass p-6 rounded-3xl space-y-4">
+        <h4 class="text-xs font-bold uppercase tracking-widest text-cyber-cyan font-mono flex items-center space-x-2">
+          <span>🏆 Eco Achievements & Milestones</span>
         </h4>
-        <div id="badges-container" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+        <div id="badges-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
       </section>
 
       <!-- Main Input & Analytics Grid -->
       <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         <!-- Activity Input Form -->
-        <div class="lg:col-span-5 glass-card p-6 rounded-3xl space-y-6">
-          <div class="flex items-center justify-between border-b border-slate-800 pb-4">
-            <h2 class="text-base font-bold text-white flex items-center space-x-2">
-              <span class="text-emerald-400">⚡</span> 
+        <div class="lg:col-span-5 neo-glass p-6 sm:p-8 rounded-3xl space-y-6">
+          <div class="flex items-center justify-between border-b border-slate-800/80 pb-4">
+            <h2 class="text-base font-bold text-white font-display flex items-center space-x-2">
+              <span class="text-brand-400">⚡</span> 
               <span id="form-title">Daily Activity Logger</span>
             </h2>
           </div>
@@ -235,47 +281,47 @@
             <!-- PERSON INPUTS -->
             <div id="person-inputs" class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Primary Transport Mode</label>
-                <select id="person-transport-mode" onchange="calculateLivePreview()" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white">
-                  <option value="bus" class="bg-slate-900">🚌 Public Transit Bus (+0.089 kg/km)</option>
-                  <option value="gas_car" class="bg-slate-900">🚗 Gasoline Sedan (+0.210 kg/km)</option>
-                  <option value="diesel_car" class="bg-slate-900">🚙 Diesel Vehicle (+0.170 kg/km)</option>
-                  <option value="motorcycle" class="bg-slate-900">🏍️ Motorcycle (+0.103 kg/km)</option>
-                  <option value="train" class="bg-slate-900">🚆 Electric Metro / Train (+0.035 kg/km)</option>
-                  <option value="ev" class="bg-slate-900">⚡ Electric Scooter / EV (+0.053 kg/km)</option>
-                  <option value="walk" class="bg-slate-900">🚲 Bicycle / Walk (Saves +0.210 kg/km)</option>
+                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Transit Mode</label>
+                <select id="person-transport-mode" onchange="calculateLivePreview()" class="w-full glass-input rounded-xl px-4 py-3 text-xs text-white focus:outline-none">
+                  <option value="bus" class="bg-slate-950">🚌 Public Transit Bus (+0.089 kg/km)</option>
+                  <option value="gas_car" class="bg-slate-950">🚗 Gasoline Vehicle (+0.210 kg/km)</option>
+                  <option value="diesel_car" class="bg-slate-950">🚙 Diesel Vehicle (+0.170 kg/km)</option>
+                  <option value="motorcycle" class="bg-slate-950">🏍️ Motorcycle (+0.103 kg/km)</option>
+                  <option value="train" class="bg-slate-950">🚆 Electric Metro / Rail (+0.035 kg/km)</option>
+                  <option value="ev" class="bg-slate-950">⚡ Electric Vehicle / EV (+0.053 kg/km)</option>
+                  <option value="walk" class="bg-slate-950">🚲 Bicycle / Foot Walk (Saves +0.210 kg/km)</option>
                 </select>
 
-                <div class="mt-4 bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+                <div class="mt-4 bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80">
                   <div class="flex justify-between text-xs font-medium mb-2">
-                    <span class="text-slate-400">Distance Travelled Today</span>
-                    <span class="text-emerald-400 font-bold"><span id="val-person-dist">0</span> km</span>
+                    <span class="text-slate-400">Distance Travelled</span>
+                    <span class="text-brand-400 font-mono font-bold"><span id="val-person-dist">0</span> km</span>
                   </div>
                   <input type="range" id="input-person-dist" min="0" max="150" value="0" step="1" oninput="document.getElementById('val-person-dist').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
                 </div>
               </div>
 
               <div class="grid grid-cols-1 gap-3">
-                <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 space-y-2">
                   <div class="flex justify-between text-xs font-medium">
-                    <span class="text-slate-400">Grid Power Consumed</span>
-                    <span class="text-rose-400 font-bold"><span id="val-elec">0</span> kWh</span>
+                    <span class="text-slate-400">Grid Power Draw</span>
+                    <span class="text-rose-400 font-mono font-bold"><span id="val-elec">0</span> kWh</span>
                   </div>
                   <input type="range" id="input-elec" min="0" max="40" value="0" step="1" oninput="document.getElementById('val-elec').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
                 </div>
 
-                <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 space-y-2">
                   <div class="flex justify-between text-xs font-medium">
-                    <span class="text-slate-400">Solar Power Generated</span>
-                    <span class="text-emerald-400 font-bold"><span id="val-solar">0</span> kWh</span>
+                    <span class="text-slate-400">Solar Generation</span>
+                    <span class="text-brand-400 font-mono font-bold"><span id="val-solar">0</span> kWh</span>
                   </div>
                   <input type="range" id="input-solar" min="0" max="40" value="0" step="1" oninput="document.getElementById('val-solar').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
                 </div>
 
-                <div class="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 space-y-2">
                   <div class="flex justify-between text-xs font-medium">
-                    <span class="text-slate-400">Daily Household Waste</span>
-                    <span class="text-amber-400 font-bold"><span id="val-waste">0</span> kg</span>
+                    <span class="text-slate-400">Household Waste Output</span>
+                    <span class="text-amber-400 font-mono font-bold"><span id="val-waste">0</span> kg</span>
                   </div>
                   <input type="range" id="input-waste" min="0" max="25" value="0" step="0.5" oninput="document.getElementById('val-waste').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
                 </div>
@@ -284,24 +330,24 @@
 
             <!-- FACTORY INPUTS -->
             <div id="factory-inputs" class="hidden space-y-4">
-              <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-800 space-y-3">
+              <div class="bg-slate-950/60 p-4 rounded-2xl border border-slate-800/80 space-y-3">
                 <div>
                   <label class="block text-xs font-semibold text-rose-400 mb-1">Industrial Boiler Coal Consumed (Tons)</label>
-                  <input type="number" id="input-coal" step="0.1" min="0" placeholder="e.g. 2.5" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white"/>
-                  <small class="text-[10px] text-slate-500">1 Ton Coal = 2,420 kg CO2</small>
+                  <input type="number" id="input-coal" step="0.1" min="0" placeholder="e.g. 2.5" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none"/>
+                  <small class="text-[10px] text-slate-500 font-mono">1 Ton Coal = 2,420 kg CO2</small>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label class="block text-xs font-semibold text-amber-400 mb-1">Hazardous / Chemical Waste (kg)</label>
-                    <input type="number" id="input-haz-waste" step="1" min="0" placeholder="e.g. 50" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white"/>
-                    <small class="text-[10px] text-slate-500">+2.5 kg CO2 / kg</small>
+                    <label class="block text-xs font-semibold text-amber-400 mb-1">Hazardous Waste (kg)</label>
+                    <input type="number" id="input-haz-waste" step="1" min="0" placeholder="e.g. 50" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none"/>
+                    <small class="text-[10px] text-slate-500 font-mono">+2.5 kg CO2 / kg</small>
                   </div>
 
                   <div>
-                    <label class="block text-xs font-semibold text-amber-300 mb-1">Solid Industrial Waste (kg)</label>
-                    <input type="number" id="input-solid-waste" step="1" min="0" placeholder="e.g. 200" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white"/>
-                    <small class="text-[10px] text-slate-500">+1.5 kg CO2 / kg</small>
+                    <label class="block text-xs font-semibold text-amber-300 mb-1">Solid Waste (kg)</label>
+                    <input type="number" id="input-solid-waste" step="1" min="0" placeholder="e.g. 200" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none"/>
+                    <small class="text-[10px] text-slate-500 font-mono">+1.5 kg CO2 / kg</small>
                   </div>
                 </div>
               </div>
@@ -309,62 +355,63 @@
 
             <!-- Direct Offset Input -->
             <div>
-              <label class="block text-xs font-semibold text-cyan-300 mb-1.5">Direct Offset Certificate Purchased (kg CO2)</label>
-              <input type="number" id="input-direct-offset" step="0.1" min="0" placeholder="e.g. 25.0" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-3.5 py-2.5 text-xs text-white"/>
+              <label class="block text-xs font-semibold text-cyber-cyan mb-1.5">Direct Offset Certificate Purchase (kg CO2)</label>
+              <input type="number" id="input-direct-offset" step="0.1" min="0" placeholder="e.g. 25.0" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none"/>
             </div>
 
-            <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-xs space-y-2">
+            <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-xs space-y-2">
               <div class="flex justify-between items-center text-slate-400">
-                <span>Estimated Release: <strong id="preview-released" class="text-rose-400 font-bold">0.00</strong> kg</span>
-                <span>Estimated Avoided: <strong id="preview-saved" class="text-emerald-400 font-bold">0.00</strong> kg</span>
+                <span>Est. Released: <strong id="preview-released" class="text-rose-400 font-mono font-bold">0.00</strong> kg</span>
+                <span>Est. Avoided: <strong id="preview-saved" class="text-brand-400 font-mono font-bold">0.00</strong> kg</span>
               </div>
-              <div class="flex justify-between items-center border-t border-slate-800 pt-2">
-                <span class="text-slate-300 font-semibold">Trees Needed to Plant:</span>
-                <strong id="live-trees-preview" class="text-emerald-400 font-bold">0 Trees</strong>
+              <div class="flex justify-between items-center border-t border-slate-800/80 pt-2">
+                <span class="text-slate-300 font-semibold">Trees Offset Required:</span>
+                <strong id="live-trees-preview" class="text-brand-400 font-bold">0 Trees</strong>
               </div>
             </div>
 
-            <button type="submit" class="w-full btn-gradient text-slate-950 font-extrabold text-sm py-3.5 rounded-xl uppercase tracking-wider">Save Record to Database</button>
+            <!-- SIMPLE, CLEAN BUTTON NAME -->
+            <button type="submit" class="w-full btn-cyber text-slate-950 font-black text-xs py-3.5 rounded-xl uppercase tracking-widest">Save Daily Log</button>
           </form>
         </div>
 
         <!-- Analytics Section with Dual Bar + Donut Chart -->
         <div class="lg:col-span-7 space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div class="glass-card p-5 rounded-3xl">
-              <h3 class="text-xs font-bold text-white mb-3">Emissions vs Offsets</h3>
+            <div class="neo-glass p-5 rounded-3xl">
+              <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 font-display">Emissions vs Offsets</h3>
               <div class="h-48"><canvas id="categoryChart"></canvas></div>
             </div>
             
-            <div class="glass-card p-5 rounded-3xl">
-              <h3 class="text-xs font-bold text-white mb-3">Emissions Breakdown</h3>
+            <div class="neo-glass p-5 rounded-3xl">
+              <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 font-display">Emissions Breakdown</h3>
               <div class="h-48"><canvas id="donutChart"></canvas></div>
             </div>
           </div>
 
-          <div class="glass-card p-6 rounded-3xl">
-            <h3 class="text-sm font-bold text-white mb-4">🏆 Community Eco Leaderboard</h3>
+          <div class="neo-glass p-6 rounded-3xl">
+            <h3 class="text-sm font-bold text-white mb-4 font-display">🏆 Community Leaderboard</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs text-slate-300">
-                <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] font-bold">
+                <thead class="bg-slate-950/80 text-slate-400 uppercase text-[9px] font-mono tracking-widest">
                   <tr>
                     <th class="p-3">Rank</th>
                     <th class="p-3">User</th>
-                    <th class="p-3">Tier</th>
+                    <th class="p-3">Scope</th>
                     <th class="p-3">Avoided</th>
                     <th class="p-3 text-right">Credits Earned</th>
                   </tr>
                 </thead>
-                <tbody id="leaderboard-body" class="divide-y divide-slate-800"></tbody>
+                <tbody id="leaderboard-body" class="divide-y divide-slate-800/60 font-mono"></tbody>
               </table>
             </div>
           </div>
 
-          <div class="glass-card p-6 rounded-3xl">
-            <h3 class="text-sm font-bold text-white mb-4">Historical Activity Log</h3>
+          <div class="neo-glass p-6 rounded-3xl">
+            <h3 class="text-sm font-bold text-white mb-4 font-display">Historical Activity Log</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs text-slate-300">
-                <thead class="bg-slate-900 text-slate-400 uppercase text-[10px] font-bold">
+                <thead class="bg-slate-950/80 text-slate-400 uppercase text-[9px] font-mono tracking-widest">
                   <tr>
                     <th class="p-3">Date</th>
                     <th class="p-3">Mode</th>
@@ -374,7 +421,7 @@
                     <th class="p-3 text-right">Action</th>
                   </tr>
                 </thead>
-                <tbody id="logs-table-body" class="divide-y divide-slate-800"></tbody>
+                <tbody id="logs-table-body" class="divide-y divide-slate-800/60 font-mono"></tbody>
               </table>
             </div>
           </div>
@@ -393,8 +440,8 @@
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      const bgColor = type === 'success' ? 'bg-slate-900 border-emerald-500/50 text-emerald-300' : 'bg-slate-900 border-rose-500/50 text-rose-300';
-      toast.className = `pointer-events-auto border backdrop-blur-xl ${bgColor} text-xs font-semibold px-4 py-3 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-3 opacity-0`;
+      const bgColor = type === 'success' ? 'bg-slate-900 border-brand-500/50 text-brand-300' : 'bg-slate-900 border-rose-500/50 text-rose-300';
+      toast.className = `pointer-events-auto border backdrop-blur-xl ${bgColor} text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-3 opacity-0 flex items-center space-x-2`;
       toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span> <span>${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => toast.classList.remove('translate-y-3', 'opacity-0'), 50);
@@ -466,7 +513,7 @@
       if (isFactory) {
         document.getElementById('person-inputs').classList.add('hidden');
         document.getElementById('factory-inputs').classList.remove('hidden');
-        document.getElementById('form-title').innerText = '🏭 Industrial Plant Logger';
+        document.getElementById('form-title').innerText = '🏭 Industrial Facility Logger';
       } else {
         document.getElementById('person-inputs').classList.remove('hidden');
         document.getElementById('factory-inputs').classList.add('hidden');
@@ -608,12 +655,12 @@
 
         const row = document.createElement('tr');
         row.innerHTML = `
-          <td class="p-3 font-mono text-[11px]">${new Date(log.date).toLocaleDateString()}</td>
-          <td class="p-3 text-emerald-400 capitalize font-medium">${modeDisplay}</td>
+          <td class="p-3 text-[11px] text-slate-400">${new Date(log.date).toLocaleDateString()}</td>
+          <td class="p-3 text-brand-400 capitalize font-medium">${modeDisplay}</td>
           <td class="p-3 text-rose-400 font-semibold">${log.releasedKg} kg</td>
-          <td class="p-3 text-emerald-400 font-semibold">${log.savedKg} kg</td>
-          <td class="p-3 text-emerald-400 font-bold">${log.treesNeeded} Trees 🌲</td>
-          <td class="p-3 text-right"><button onclick="deleteLog('${log._id}')" class="text-slate-500 hover:text-rose-400">Delete</button></td>
+          <td class="p-3 text-brand-400 font-semibold">${log.savedKg} kg</td>
+          <td class="p-3 text-brand-400 font-bold">${log.treesNeeded} Trees 🌲</td>
+          <td class="p-3 text-right"><button onclick="deleteLog('${log._id}')" class="text-slate-500 hover:text-rose-400 transition">Delete</button></td>
         `;
         tableBody.appendChild(row);
       });
@@ -644,8 +691,8 @@
       container.innerHTML = '';
       badges.forEach(b => {
         const badgeEl = document.createElement('div');
-        badgeEl.className = `p-3 rounded-xl border text-center ${b.active ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300' : 'bg-slate-900 border-slate-800 opacity-40 text-slate-500'}`;
-        badgeEl.innerHTML = `<div class="text-xl">${b.icon}</div><div class="text-xs font-bold mt-1">${b.title}</div><div class="text-[10px] text-slate-400">${b.desc}</div>`;
+        badgeEl.className = `p-4 rounded-2xl border text-center transition-all ${b.active ? 'bg-brand-500/10 border-brand-500/30 text-brand-300 shadow-lg shadow-brand-500/10' : 'bg-slate-950/60 border-slate-800/80 opacity-40 text-slate-500'}`;
+        badgeEl.innerHTML = `<div class="text-2xl">${b.icon}</div><div class="text-xs font-bold mt-1 font-display">${b.title}</div><div class="text-[10px] text-slate-400 mt-0.5">${b.desc}</div>`;
         container.appendChild(badgeEl);
       });
     }
@@ -657,7 +704,7 @@
         type: 'bar',
         data: {
           labels: ['Released', 'Avoided'],
-          datasets: [{ data: [released, saved], backgroundColor: ['#f43f5e', '#22c55e'], borderRadius: 8 }]
+          datasets: [{ data: [released, saved], backgroundColor: ['#f43f5e', '#10b981'], borderRadius: 8 }]
         },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
@@ -666,7 +713,7 @@
       if (donutChartInstance) donutChartInstance.destroy();
 
       const labels = currentUser.accountType === 'factory' 
-        ? ['Boiler Coal', 'Hazardous Waste', 'Solid Industrial Waste'] 
+        ? ['Boiler Coal', 'Hazardous Waste', 'Solid Waste'] 
         : ['Transport', 'Grid Power', 'Household Waste'];
         
       const data = currentUser.accountType === 'factory' 
@@ -674,8 +721,8 @@
         : [transportCO2, powerCO2, wasteCO2];
         
       const colors = currentUser.accountType === 'factory' 
-        ? ['#f43f5e', '#f59e0b', '#3b82f6'] 
-        : ['#06b6d4', '#f59e0b', '#ef4444'];
+        ? ['#f43f5e', '#f59e0b', '#06b6d4'] 
+        : ['#06b6d4', '#f59e0b', '#f43f5e'];
 
       donutChartInstance = new Chart(ctx2, {
         type: 'doughnut',
@@ -695,8 +742,8 @@
           <td class="p-3 font-bold">${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}</td>
           <td class="p-3 font-semibold text-white">${user.username}</td>
           <td class="p-3 uppercase text-[10px] text-slate-400">${user.accountType}</td>
-          <td class="p-3 text-emerald-400 font-semibold">${user.totalSaved.toFixed(1)} kg</td>
-          <td class="p-3 text-right text-cyan-400 font-bold font-mono">${user.totalCredits.toFixed(5)}</td>
+          <td class="p-3 text-brand-400 font-semibold">${user.totalSaved.toFixed(1)} kg</td>
+          <td class="p-3 text-right text-cyber-cyan font-bold">${user.totalCredits.toFixed(5)}</td>
         `;
         body.appendChild(row);
       });
