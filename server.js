@@ -202,24 +202,16 @@ app.delete('/api/logs/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// --- AI SUSTAINABILITY ADVISOR ENDPOINT ---
-app.post('/api/ai-advisor', authenticateToken, async (req, res) => {
+// --- SUSTAINABILITY ADVISOR ENDPOINT ---
+app.get('/api/sustainability-advisor', authenticateToken, async (req, res) => {
   try {
-    const { userQuery } = req.body;
     const logs = await CarbonLog.find({ userId: req.user.id }).sort({ date: -1 }).limit(5);
-
     const userType = req.user.accountType;
     let totalReleased = 0;
-    let totalSaved = 0;
 
-    logs.forEach(log => {
-      totalReleased += log.releasedKg;
-      totalSaved += log.savedKg;
-    });
+    logs.forEach(log => { totalReleased += log.releasedKg; });
 
-    // Rule-Based Intelligence Engine (Instant personalized advice fallback)
     let advice = "";
-
     if (userType === 'factory') {
       advice = `Hello ${req.user.username}! Based on your recent industrial logs (Total Released: ${totalReleased.toFixed(1)} kg CO2):\n\n` +
         `1. 🏭 **Boiler Efficiency:** Consider shifting a portion of coal boiler fuel to biomass co-firing to reduce gross CO2 factors.\n` +
@@ -232,13 +224,9 @@ app.post('/api/ai-advisor', authenticateToken, async (req, res) => {
         `3. ♻️ **Waste Management:** Composting organic waste prevents methane generation and avoids 1.9 kg CO2 per kg logged.`;
     }
 
-    if (userQuery && userQuery.trim() !== '') {
-      advice += `\n\n💡 **Regarding your question ("${userQuery}"):** Focus on small daily incremental changes—tracking daily entries is the fastest way to hit net-zero targets!`;
-    }
-
     res.json({ advice });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to generate AI advice.' });
+    res.status(500).json({ error: 'Failed to generate sustainability advice.' });
   }
 });
 
