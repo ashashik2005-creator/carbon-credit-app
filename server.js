@@ -7,7 +7,7 @@ const path = require('path');
 const PDFDocument = require('pdfkit');
 const dns = require('dns');
 
-// 1. Force Node.js to use Google Public DNS to resolve MongoDB SRV records
+// 1. Force Node.js DNS resolution to Google DNS to prevent SRV connection errors
 try {
   dns.setServers(['8.8.8.8', '8.8.4.4']);
   console.log('🌐 Node DNS set to Google Public DNS (8.8.8.8)');
@@ -17,27 +17,23 @@ try {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const JWT_SECRET = 'super_secret_carbon_key_2026';
+const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_carbon_key_2026';
 
-// MongoDB Atlas URI
-const MONGO_URI = 'mongodb+srv://ashikpoojary2005_db_user:5qoIcQsBV8caZkcp@cluster0.dxrrxua.mongodb.net/carbondb?retryWrites=true&w=majority';
+// MongoDB Atlas Connection URI
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://ashikpoojary2005_db_user:5qoIcQsBV8caZkcp@cluster0.dxrrxua.mongodb.net/carbondb?retryWrites=true&w=majority';
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Disable query buffering so operations fail fast if DB drops
 mongoose.set('bufferCommands', false);
 
 // Database Connection
-mongoose.connect(MONGO_URI, {
-  serverSelectionTimeoutMS: 10000
-})
+mongoose.connect(MONGO_URI, { serverSelectionTimeoutMS: 10000 })
   .then(() => console.log('✅ Connected to MongoDB database successfully.'))
   .catch(err => console.error('❌ MongoDB Connection Error:', err.message));
 
-// Middleware to check database connection
 app.use((req, res, next) => {
   if (mongoose.connection.readyState !== 1 && req.path.startsWith('/api/')) {
     return res.status(503).json({ 
@@ -47,7 +43,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// --- MONGOOSE SCHEMAS ---
+// --- SCHEMAS ---
 const UserSchema = new mongoose.Schema({
   username: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
@@ -59,11 +55,17 @@ const UserSchema = new mongoose.Schema({
 const CarbonLogSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   accountType: { type: String, enum: ['person', 'factory'], required: true },
+  // Person metrics
   transportMode: { type: String, default: 'none' },
   transportDistance: { type: Number, default: 0 },
   gridPowerKwh: { type: Number, default: 0 },
   solarPowerKwh: { type: Number, default: 0 },
-  wasteKg: { type: Number, default: 0 }, // 👈 Added Waste Field (kg)
+  wasteKg: { type: Number, default: 0 },
+  // Factory metrics
+  coalTons: { type: Number, default: 0 },
+  hazardousWasteKg: { type: Number, default: 0 },
+  solidWasteKg: { type: Number, default: 0 },
+  // Calculated Totals
   offsetKg: { type: Number, default: 0 },
   releasedKg: { type: Number, required: true },
   savedKg: { type: Number, required: true },
@@ -89,27 +91,17 @@ const authenticateToken = (req, res, next) => {
   });
 };
 
-// --- AUTHENTICATION API ROUTES ---
+// --- AUTHENTICATION ROUTES ---
 app.post('/api/auth/register', async (req, res) => {
   try {
     const { username, email, password, accountType } = req.body;
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: 'Please enter all required fields.' });
-    }
+    if (!username || !email || !password) return res.status(400).json({ error: 'Please enter all required fields.' });
 
     const existingUser = await User.findOne({ $or: [{ username }, { email }] });
-    if (existingUser) {
-      return res.status(400).json({ error: 'Username or email already exists.' });
-    }
+    if (existingUser) return res.status(400).json({ error: 'Username or email already exists.' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-      accountType: accountType || 'person'
-    });
-
+    const newUser = new User({ username, email, password: hashedPassword, accountType: accountType || 'person' });
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully!' });
   } catch (error) {
@@ -120,10 +112,7 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
   try {
     const { identifier, password } = req.body;
-    const user = await User.findOne({
-      $or: [{ username: identifier }, { email: identifier }]
-    });
-
+    const user = await User.findOne({ $or: [{ username: identifier }, { email: identifier }] });
     if (!user) return res.status(400).json({ error: 'Invalid username/email or password.' });
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -134,17 +123,13 @@ app.post('/api/auth/login', async (req, res) => {
       JWT_SECRET,
       { expiresIn: '7d' }
     );
-
-    res.json({
-      token,
-      user: { id: user._id, username: user.username, email: user.email, accountType: user.accountType }
-    });
+    res.json({ token, user: { id: user._id, username: user.username, email: user.email, accountType: user.accountType } });
   } catch (error) {
     res.status(500).json({ error: 'Server error during login.' });
   }
 });
 
-// --- CARBON LOGS API ROUTES ---
+// --- CARBON LOGS ROUTES ---
 app.get('/api/logs', authenticateToken, async (req, res) => {
   try {
     const logs = await CarbonLog.find({ userId: req.user.id }).sort({ date: -1 });
@@ -163,31 +148,46 @@ app.post('/api/logs', authenticateToken, async (req, res) => {
       gridPowerKwh, 
       solarPowerKwh, 
       wasteKg, 
+      coalTons, 
+      hazardousWasteKg,
+      solidWasteKg,
       offsetKg 
     } = req.body;
 
-    // Transport Factors (kg CO2 per km)
-    const transportRates = {
-      bus: 0.089,
-      car: 0.171,
-      motorbike: 0.103,
-      train: 0.035,
-      walk_bike: 0.0,
-      none: 0.0
-    };
+    let totalReleased = 0;
+    let totalSaved = 0;
 
-    const rate = transportRates[transportMode] || 0;
-    const transportCO2 = (parseFloat(transportDistance) || 0) * rate;
-    const gridCO2 = (parseFloat(gridPowerKwh) || 0) * 0.82; // 0.82 kg CO2 per kWh grid electricity
-    const wasteCO2 = (parseFloat(wasteKg) || 0) * 1.9; // 1.9 kg CO2 per kg unmanaged waste
+    if ((accountType || req.user.accountType) === 'factory') {
+      // FACTORY CALCULATION: Coal + Hazardous Waste + Solid Industrial Waste
+      const cTons = parseFloat(coalTons) || 0;
+      const hazWaste = parseFloat(hazardousWasteKg) || 0;
+      const solWaste = parseFloat(solidWasteKg) || 0;
 
-    // Total Released CO2 (Transport + Power + Waste)
-    const totalReleased = transportCO2 + gridCO2 + wasteCO2;
+      const coalCO2 = cTons * 2420;   // 1 Ton Coal = 2,420 kg CO2
+      const hazCO2 = hazWaste * 2.5;  // 1 kg Hazardous Waste = 2.5 kg CO2
+      const solCO2 = solWaste * 1.5;  // 1 kg Solid Industrial Waste = 1.5 kg CO2
 
-    // Total Saved / Offset CO2 (Solar avoided emissions + Direct Offset purchased)
-    const solarSavedCO2 = (parseFloat(solarPowerKwh) || 0) * 0.82;
+      totalReleased = coalCO2 + hazCO2 + solCO2;
+      totalSaved = 0;
+    } else {
+      // PERSON CALCULATION: Transport, Grid Power & Household Waste
+      const transportRates = { bus: 0.089, gas_car: 0.210, diesel_car: 0.170, motorcycle: 0.103, train: 0.035, ev: 0.053, walk: 0.0, none: 0.0 };
+      const tDist = parseFloat(transportDistance) || 0;
+      const rate = transportRates[transportMode] || 0;
+
+      const transportCO2 = tDist * rate;
+      const gridCO2 = (parseFloat(gridPowerKwh) || 0) * 0.82;
+      const wasteCO2 = (parseFloat(wasteKg) || 0) * 1.9;
+      
+      totalReleased = transportCO2 + gridCO2 + wasteCO2;
+
+      const solarSavedCO2 = (parseFloat(solarPowerKwh) || 0) * 0.82;
+      const walkSavedCO2 = transportMode === 'walk' ? tDist * 0.210 : 0;
+      totalSaved = solarSavedCO2 + walkSavedCO2;
+    }
+
     const directOffset = parseFloat(offsetKg) || 0;
-    const totalSaved = solarSavedCO2 + directOffset;
+    totalSaved += directOffset;
 
     const netSaved = totalSaved - totalReleased;
     const credits = netSaved / 1000;
@@ -201,6 +201,9 @@ app.post('/api/logs', authenticateToken, async (req, res) => {
       gridPowerKwh: parseFloat(gridPowerKwh) || 0,
       solarPowerKwh: parseFloat(solarPowerKwh) || 0,
       wasteKg: parseFloat(wasteKg) || 0,
+      coalTons: parseFloat(coalTons) || 0,
+      hazardousWasteKg: parseFloat(hazardousWasteKg) || 0,
+      solidWasteKg: parseFloat(solidWasteKg) || 0,
       offsetKg: directOffset,
       releasedKg: Number(totalReleased.toFixed(2)),
       savedKg: Number(totalSaved.toFixed(2)),
@@ -226,16 +229,15 @@ app.delete('/api/logs/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// --- CSV EXPORT ENDPOINT ---
+// --- EXPORT ENDPOINTS ---
 app.get('/api/export/csv', authenticateToken, async (req, res) => {
   try {
     const logs = await CarbonLog.find({ userId: req.user.id }).sort({ date: -1 });
-    
-    let csv = 'Date,Account Type,Transport Mode,Distance (km),Waste Generated (kg),Released (kg),Saved (kg),Net Saved (kg),Credits Earned,Trees Needed\n';
+    let csv = 'Date,Account Type,Transport/Industrial Mode,Released (kg),Saved (kg),Credits Earned,Trees Needed\n';
     logs.forEach(log => {
-      csv += `"${new Date(log.date).toISOString().split('T')[0]}","${log.accountType}","${log.transportMode}",${log.transportDistance || 0},${log.wasteKg || 0},${log.releasedKg},${log.savedKg},${log.netSavedKg},${log.creditsEarned},${log.treesNeeded || Math.ceil(log.releasedKg / 21.77)}\n`;
+      const modeText = log.accountType === 'factory' ? `Industrial Coal (${log.coalTons}T), HazWaste (${log.hazardousWasteKg}kg)` : log.transportMode;
+      csv += `"${new Date(log.date).toISOString().split('T')[0]}","${log.accountType}","${modeText}",${log.releasedKg},${log.savedKg},${log.creditsEarned},${log.treesNeeded}\n`;
     });
-
     res.header('Content-Type', 'text/csv');
     res.attachment(`carbon_logs_${req.user.username}.csv`);
     return res.send(csv);
@@ -244,13 +246,11 @@ app.get('/api/export/csv', authenticateToken, async (req, res) => {
   }
 });
 
-// --- PDF CERTIFICATE GENERATOR ---
 app.get('/api/export/certificate', authenticateToken, async (req, res) => {
   try {
     const logs = await CarbonLog.find({ userId: req.user.id });
     const totalCredits = logs.reduce((sum, log) => sum + log.creditsEarned, 0);
     const totalReleased = logs.reduce((sum, log) => sum + log.releasedKg, 0);
-    const totalWaste = logs.reduce((sum, log) => sum + (log.wasteKg || 0), 0);
     const treesNeeded = Math.ceil(totalReleased / 21.77);
 
     const doc = new PDFDocument({ margin: 50 });
@@ -259,7 +259,6 @@ app.get('/api/export/certificate', authenticateToken, async (req, res) => {
     doc.pipe(res);
 
     doc.rect(20, 20, doc.page.width - 40, doc.page.height - 40).stroke('#10b981');
-
     doc.moveDown(2);
     doc.fontSize(26).fillColor('#10b981').text('OFFICIAL CARBON CREDIT CERTIFICATE', { align: 'center' });
     doc.moveDown(1);
@@ -267,56 +266,70 @@ app.get('/api/export/certificate', authenticateToken, async (req, res) => {
     doc.moveDown(0.5);
     doc.fontSize(22).fillColor('#0f172a').text(req.user.username.toUpperCase(), { align: 'center' });
     doc.moveDown(1);
-
-    doc.fontSize(12).fillColor('#475569').text(
-      `This certificate confirms that ${req.user.username} has tracked carbon footprint, tracked ${totalWaste.toFixed(1)} kg of waste, and accumulated:`,
-      { align: 'center' }
-    );
-
+    doc.fontSize(12).fillColor('#475569').text(`This certificate confirms that ${req.user.username} (${req.user.accountType.toUpperCase()} MODE) has tracked carbon footprint and accumulated:`, { align: 'center' });
     doc.moveDown(1.5);
     doc.fontSize(28).fillColor('#059669').text(`${totalCredits.toFixed(5)} Carbon Credits`, { align: 'center' });
     doc.fontSize(12).fillColor('#64748b').text(`(Tree Offset Requirement: ${treesNeeded} Trees to Plant)`, { align: 'center' });
-
     doc.moveDown(3);
     doc.fontSize(10).fillColor('#94a3b8').text(`Generated on: ${new Date().toLocaleDateString()}`, { align: 'center' });
     doc.text('Verified by EcoCreditHub Platform', { align: 'center' });
-
     doc.end();
   } catch (error) {
     res.status(500).json({ error: 'Failed to generate PDF Certificate.' });
   }
 });
 
-// --- ECO LEADERBOARD ENDPOINT ---
+app.get('/api/export/monthly-pdf', authenticateToken, async (req, res) => {
+  try {
+    const logs = await CarbonLog.find({ userId: req.user.id }).sort({ date: -1 });
+    const totalReleased = logs.reduce((sum, log) => sum + log.releasedKg, 0);
+    const totalSaved = logs.reduce((sum, log) => sum + log.savedKg, 0);
+    const totalCredits = logs.reduce((sum, log) => sum + log.creditsEarned, 0);
+    const totalTrees = Math.ceil(totalReleased / 21.77);
+
+    const doc = new PDFDocument({ margin: 40 });
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=Monthly_Carbon_Report_${req.user.username}.pdf`);
+    doc.pipe(res);
+
+    doc.fontSize(20).fillColor('#0f172a').text(`Monthly Carbon Analytics Report (${req.user.accountType.toUpperCase()})`, { align: 'center' });
+    doc.fontSize(10).fillColor('#64748b').text(`User: ${req.user.username} | Date: ${new Date().toLocaleDateString()}`, { align: 'center' });
+    doc.moveDown(1.5);
+
+    doc.fontSize(12).fillColor('#0f172a').text(`• Gross Carbon Released: ${totalReleased.toFixed(2)} kg CO2`);
+    doc.text(`• Total Carbon Avoided/Saved: ${totalSaved.toFixed(2)} kg CO2`);
+    doc.text(`• Net Carbon Credits Earned: ${totalCredits.toFixed(5)}`);
+    doc.text(`• Total Trees Needed to Offset: ${totalTrees} Trees`);
+    doc.moveDown(1.5);
+
+    doc.fontSize(14).fillColor('#10b981').text('Recent Activity Log History');
+    doc.moveDown(0.5);
+
+    logs.slice(0, 15).forEach((log, index) => {
+      const modeDesc = log.accountType === 'factory' 
+        ? `Coal: ${log.coalTons}T, HazWaste: ${log.hazardousWasteKg}kg, SolidWaste: ${log.solidWasteKg}kg` 
+        : `Mode: ${log.transportMode}`;
+      doc.fontSize(9).fillColor('#334155').text(
+        `${index + 1}. [${new Date(log.date).toLocaleDateString()}] ${modeDesc} | Released: ${log.releasedKg} kg | Saved: ${log.savedKg} kg | Trees: ${log.treesNeeded}`
+      );
+    });
+
+    doc.end();
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to generate Monthly PDF Report.' });
+  }
+});
+
+// LEADERBOARD ENDPOINT
 app.get('/api/leaderboard', async (req, res) => {
   try {
     const leaderboard = await CarbonLog.aggregate([
-      {
-        $group: {
-          _id: '$userId',
-          totalSaved: { $sum: '$savedKg' },
-          totalCredits: { $sum: '$creditsEarned' }
-        }
-      },
+      { $group: { _id: '$userId', totalSaved: { $sum: '$savedKg' }, totalCredits: { $sum: '$creditsEarned' } } },
       { $sort: { totalCredits: -1 } },
       { $limit: 10 },
-      {
-        $lookup: {
-          from: 'users',
-          localField: '_id',
-          foreignField: '_id',
-          as: 'userInfo'
-        }
-      },
+      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'userInfo' } },
       { $unwind: '$userInfo' },
-      {
-        $project: {
-          username: '$userInfo.username',
-          accountType: '$userInfo.accountType',
-          totalSaved: 1,
-          totalCredits: 1
-        }
-      }
+      { $project: { username: '$userInfo.username', accountType: '$userInfo.accountType', totalSaved: 1, totalCredits: 1 } }
     ]);
     res.json(leaderboard);
   } catch (error) {
@@ -324,7 +337,6 @@ app.get('/api/leaderboard', async (req, res) => {
   }
 });
 
-// Serve Frontend SPA
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
