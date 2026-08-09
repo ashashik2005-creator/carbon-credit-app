@@ -179,11 +179,7 @@
     }
     #signin-view > .editorial-panel, #signup-view > .editorial-panel {
       max-width:440px !important; border-radius:26px !important; padding:42px !important;
-    }
-    #signin-view .inline-flex, #signup-view .inline-flex {
-      width:66px !important; height:66px !important; border-radius:18px !important;
-      background: linear-gradient(150deg, rgba(47,174,125,.18), rgba(255,255,255,.02)) !important;
-      box-shadow: inset 0 0 0 1px rgba(244,247,243,.10) !important;
+      margin: auto;
     }
     #signin-view h1, #signup-view h1 { font-size:1.85rem; }
     #signin-view form, #signup-view form { margin-top:24px; }
@@ -348,8 +344,8 @@
         </div>
         <div class="flex-1">
           <div class="flex items-center gap-1.5">
-            <span class="text-[15px] text-white leading-none">EcoMatrix</span>
-            <span class="premium-pill text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full" style="background:rgba(217,196,143,.15); color:#eddcae; border:1px solid rgba(217,196,143,.3)">Pro</span>
+            <span class="text-[15px] font-semibold text-white leading-none">EcoMatrix</span>
+            <span class="premium-pill text-[8px] font-mono font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full" style="background:rgba(217,196,143,.15); color:#eddcae; border:1px solid rgba(217,196,143,.3)">Pro</span>
           </div>
           <div class="text-[9px] font-mono uppercase tracking-widest mt-1" style="color:rgba(233,243,238,.5)">Workspace</div>
         </div>
@@ -387,14 +383,14 @@
         <div class="flex items-center gap-3 px-1 cursor-pointer" onclick="switchPanel('profile')">
           <div class="relative w-10 h-10 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,var(--green-500),var(--gold));">
             <img id="sidebar-avatar-img" class="avatar-img hidden w-full h-full object-cover" src="" alt=""/>
-            <span id="sidebar-avatar-fallback" class="avatar-fallback text-white text-xs">U</span>
+            <span id="sidebar-avatar-fallback" class="avatar-fallback text-white text-xs font-bold">U</span>
           </div>
           <div class="min-w-0">
-            <div id="sidebar-username" class="text-xs text-white truncate">—</div>
+            <div id="sidebar-username" class="text-xs font-semibold text-white truncate">—</div>
             <div id="sidebar-account-type" class="text-[9px] font-mono uppercase tracking-widest" style="color:#d9c48f">Individual</div>
           </div>
         </div>
-        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 text-xs py-2.5 rounded-xl transition" style="background:rgba(255,255,255,.05); color:rgba(233,243,238,.75)">
+        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 text-xs font-semibold py-2.5 rounded-xl transition cursor-pointer" style="background:rgba(255,255,255,.05); color:rgba(233,243,238,.75)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           Sign out
         </button>
@@ -405,7 +401,7 @@
     <div id="main-wrap">
       <header id="app-topbar" class="px-6 sm:px-10 py-5 flex items-center justify-between">
         <div>
-          <h2 id="panel-title" class="text-xl">Overview</h2>
+          <h2 id="panel-title" class="text-xl font-semibold">Overview</h2>
           <p id="panel-subtitle" class="text-xs mt-0.5" style="color:var(--muted)">Your carbon position at a glance</p>
         </div>
         <button onclick="switchPanel('log')" class="hidden sm:flex btn-editorial text-xs px-5 py-2.5 rounded-xl uppercase tracking-widest">New entry</button>
@@ -425,7 +421,7 @@
                   <span class="h-1.5 w-1.5 rounded-full" style="background:#d9c48f"></span>
                   Reading live
                 </div>
-                <h1 class="mt-4 text-3xl sm:text-4xl lg:text-5xl text-white leading-[1.08]">
+                <h1 class="mt-4 text-3xl sm:text-4xl lg:text-5xl font-semibold text-white leading-[1.08]">
                   Measure what you emit.<br class="hidden sm:block"/> <span style="color:#9fe0c2">Prove what you avoid.</span>
                 </h1>
                 <p class="mt-4 max-w-xl text-sm leading-7" style="color:rgba(233,243,238,.65)">
@@ -446,7 +442,7 @@
                   <text x="185" y="150" font-family="IBM Plex Mono" font-size="9" fill="#4fbf90" letter-spacing="1">AVOIDED</text>
                 </svg>
                 <div class="text-center -mt-4">
-                  <div id="gauge-net-value" class="text-2xl font-mono" style="color:#e9dcb8">+0.0 kg</div>
+                  <div id="gauge-net-value" class="text-2xl font-mono font-bold" style="color:#e9dcb8">+0.0 kg</div>
                   <div class="text-[9px] font-mono uppercase tracking-widest mt-1" style="color:rgba(233,243,238,.5)">Net position</div>
                 </div>
               </div>
@@ -455,39 +451,39 @@
 
           <section class="metrics-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             <div class="editorial-card p-6 rounded-[20px]">
-              <p class="text-[10px] font-mono uppercase tracking-widest" style="color:var(--muted)">Released</p>
+              <p class="text-[10px] font-mono font-bold uppercase tracking-widest" style="color:var(--muted)">Released</p>
               <div class="flex items-baseline space-x-1.5 mt-3">
-                <span id="stat-released" class="text-4xl" style="color:var(--brick)">0.00</span>
+                <span id="stat-released" class="text-4xl font-semibold" style="color:var(--brick)">0.00</span>
                 <span class="text-xs font-mono" style="color:var(--muted)">kg CO2</span>
               </div>
             </div>
             <div class="editorial-card p-6 rounded-[20px]">
-              <p class="text-[10px] font-mono uppercase tracking-widest" style="color:var(--muted)">Avoided</p>
+              <p class="text-[10px] font-mono font-bold uppercase tracking-widest" style="color:var(--muted)">Avoided</p>
               <div class="flex items-baseline space-x-1.5 mt-3">
-                <span id="stat-saved" class="text-4xl text-matrixNeon">0.00</span>
+                <span id="stat-saved" class="text-4xl font-semibold text-matrixNeon">0.00</span>
                 <span class="text-xs font-mono" style="color:var(--muted)">kg CO2</span>
               </div>
             </div>
             <div class="editorial-card p-6 rounded-[20px]">
-              <p class="text-[10px] font-mono uppercase tracking-widest" style="color:var(--muted)">Net credits</p>
+              <p class="text-[10px] font-mono font-bold uppercase tracking-widest" style="color:var(--muted)">Net credits</p>
               <div class="flex items-baseline space-x-1.5 mt-3">
-                <span id="stat-credits" class="text-3xl font-mono text-electricGreen">0.00000</span>
+                <span id="stat-credits" class="text-3xl font-bold font-mono text-electricGreen">0.00000</span>
               </div>
             </div>
             <div class="editorial-card p-6 rounded-[20px]" style="border-color:rgba(47,174,125,.35)">
-              <p class="text-[10px] font-mono uppercase tracking-widest text-matrixNeon">Trees to offset</p>
+              <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-matrixNeon">Trees to offset</p>
               <div class="flex items-baseline space-x-1.5 mt-3">
-                <span id="stat-trees-needed" class="text-4xl text-matrixNeon">0</span>
+                <span id="stat-trees-needed" class="text-4xl font-semibold text-matrixNeon">0</span>
                 <span class="text-xs font-mono" style="color:var(--muted)">trees</span>
               </div>
             </div>
           </section>
 
           <section class="editorial-card p-6 sm:p-8 rounded-[20px] space-y-3">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs font-semibold">
               <div class="flex items-center space-x-3">
                 <span>Monthly cap</span>
-                <input type="number" id="custom-budget-input" value="100" min="10" step="10" onchange="updateMonthlyBudgetCap(this.value)" class="w-24 editorial-input rounded-xl px-3 py-1.5 text-xs font-mono text-center"/>
+                <input type="number" id="custom-budget-input" value="100" min="10" step="10" onchange="updateMonthlyBudgetCap(this.value)" class="w-24 editorial-input rounded-xl px-3 py-1.5 text-xs font-mono font-bold text-center"/>
                 <span style="color:var(--muted)">kg CO2</span>
               </div>
               <span id="budget-status" class="text-matrixNeon font-mono px-3.5 py-1.5 rounded-xl" style="background:rgba(47,174,125,.12)">0% used</span>
@@ -500,15 +496,15 @@
           <section class="editorial-card p-6 sm:p-8 rounded-[20px] space-y-3" style="border-color:rgba(47,174,125,.30)">
             <div class="flex items-center space-x-3">
               <span class="text-xl">🌿</span>
-              <h3 class="text-sm uppercase tracking-wider">Your advisor</h3>
+              <h3 class="text-sm font-semibold uppercase tracking-wider">Your advisor</h3>
             </div>
-            <div id="advisor-response-box" class="p-5 rounded-2xl border text-xs whitespace-pre-line leading-relaxed" style="background:rgba(255,255,255,.025); border-color:var(--line); color:var(--text)">
+            <div id="advisor-response-box" class="p-5 rounded-2xl border text-xs whitespace-pre-line leading-relaxed font-medium" style="background:rgba(255,255,255,.025); border-color:var(--line); color:var(--text)">
               Reading your latest telemetry…
             </div>
           </section>
 
           <section class="editorial-card p-6 rounded-[20px] space-y-3">
-            <h4 class="text-xs uppercase tracking-widest text-electricGreen font-mono">Milestones</h4>
+            <h4 class="text-xs font-bold uppercase tracking-widest text-electricGreen font-mono">Milestones</h4>
             <div id="badges-container" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
           </section>
         </div>
@@ -517,22 +513,22 @@
         <div id="panel-log" class="dash-panel hidden max-w-2xl">
           <div class="editorial-card p-6 sm:p-8 rounded-[20px] space-y-6">
             <div class="flex items-center justify-between border-b pb-4" style="border-color:var(--line)">
-              <h2 class="text-base" id="form-title">Log an activity</h2>
+              <h2 class="text-base font-semibold" id="form-title">Log an activity</h2>
             </div>
 
             <form id="activity-form" onsubmit="handleActivitySubmit(event)" class="space-y-5">
 
               <div class="p-4 rounded-2xl border space-y-2" style="background:rgba(255,255,255,.025); border-color:var(--line)">
-                <label class="block text-xs mb-1 text-matrixNeon">Smart receipt scanner</label>
-                <input type="file" id="bill-file-input" accept="image/*,application/pdf" onchange="handleBillUpload(event)" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs cursor-pointer" style="color:var(--muted)"/>
+                <label class="block text-xs font-semibold mb-1 text-matrixNeon">Smart receipt scanner</label>
+                <input type="file" id="bill-file-input" accept="image/*,application/pdf" onchange="handleBillUpload(event)" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold cursor-pointer" style="color:var(--muted)"/>
                 <p id="ocr-status" class="text-[10px] font-mono" style="color:var(--muted)">Upload a bill or invoice to auto-extract units.</p>
               </div>
 
               <!-- COMMUTER CONTROLS -->
               <div id="person-inputs" class="space-y-4">
                 <div>
-                  <label class="block text-[10px] uppercase tracking-wider mb-1.5 font-mono" style="color:var(--muted)">How did you get around?</label>
-                  <select id="person-transport-mode" onchange="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs">
+                  <label class="block text-[10px] font-bold uppercase tracking-wider mb-1.5 font-mono" style="color:var(--muted)">How did you get around?</label>
+                  <select id="person-transport-mode" onchange="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs font-semibold">
                     <option value="bus">Public bus (+0.089 kg/km)</option>
                     <option value="gas_car">Gasoline car (+0.210 kg/km)</option>
                     <option value="diesel_car">Diesel car (+0.170 kg/km)</option>
@@ -543,13 +539,13 @@
                   </select>
 
                   <div class="mt-3 p-4 rounded-2xl border space-y-3" style="background:rgba(255,255,255,.025); border-color:var(--line)">
-                    <div class="flex justify-between text-xs">
+                    <div class="flex justify-between text-xs font-medium">
                       <span style="color:var(--muted)">Distance</span>
-                      <span class="text-matrixNeon font-mono"><span id="val-person-dist">0</span> km</span>
+                      <span class="text-matrixNeon font-mono font-bold"><span id="val-person-dist">0</span> km</span>
                     </div>
                     <input type="range" id="input-person-dist" min="0" max="150" value="0" step="1" oninput="document.getElementById('val-person-dist').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
 
-                    <button type="button" id="gps-track-btn" onclick="toggleGpsTracking()" class="w-full text-xs py-3 rounded-xl transition flex items-center justify-center space-x-2 text-matrixNeon" style="background:rgba(47,174,125,.12); border:1px solid rgba(47,174,125,.28)">
+                    <button type="button" id="gps-track-btn" onclick="toggleGpsTracking()" class="w-full text-xs font-semibold py-3 rounded-xl transition flex items-center justify-center space-x-2 text-matrixNeon" style="background:rgba(47,174,125,.12); border:1px solid rgba(47,174,125,.28)">
                       <span>Track this trip with GPS</span>
                     </button>
                   </div>
@@ -557,34 +553,34 @@
 
                 <div class="space-y-3">
                   <div class="p-4 rounded-2xl border space-y-2" style="background:rgba(255,255,255,.025); border-color:var(--line)">
-                    <div class="flex justify-between text-xs">
+                    <div class="flex justify-between text-xs font-medium">
                       <span style="color:var(--muted)">Grid power used</span>
-                      <span class="font-mono" style="color:var(--brick)"><span id="val-elec">0</span> kWh</span>
+                      <span class="font-mono font-bold" style="color:var(--brick)"><span id="val-elec">0</span> kWh</span>
                     </div>
                     <input type="range" id="input-elec" min="0" max="5000" value="0" step="1" oninput="document.getElementById('val-elec').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
                   </div>
 
                   <div class="p-4 rounded-2xl border space-y-2" style="background:rgba(255,255,255,.025); border-color:var(--line)">
-                    <div class="flex justify-between text-xs">
+                    <div class="flex justify-between text-xs font-medium">
                       <span style="color:var(--muted)">Solar generated</span>
-                      <span class="text-matrixNeon font-mono"><span id="val-solar">0</span> kWh</span>
+                      <span class="text-matrixNeon font-mono font-bold"><span id="val-solar">0</span> kWh</span>
                     </div>
                     <input type="range" id="input-solar" min="0" max="40" value="0" step="1" oninput="document.getElementById('val-solar').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
                   </div>
 
                   <div class="p-4 rounded-2xl border space-y-3" style="background:rgba(255,255,255,.025); border-color:var(--line)">
                     <div class="flex items-center justify-between">
-                      <label class="text-xs" style="color:var(--gold)">Household size</label>
+                      <label class="text-xs font-semibold" style="color:var(--gold)">Household size</label>
                       <div class="flex items-center space-x-2">
-                        <button type="button" onclick="adjustHouseholdSize(-1)" class="w-7 h-7 rounded-xl border flex items-center justify-center" style="background:rgba(255,255,255,.04); border-color:var(--line); color:var(--text)">-</button>
-                        <span id="display-household-size" class="text-xs font-mono w-4 text-center" style="color:var(--gold)">1</span>
-                        <button type="button" onclick="adjustHouseholdSize(1)" class="w-7 h-7 rounded-xl border flex items-center justify-center" style="background:rgba(255,255,255,.04); border-color:var(--line); color:var(--text)">+</button>
+                        <button type="button" onclick="adjustHouseholdSize(-1)" class="w-7 h-7 rounded-xl border font-bold flex items-center justify-center" style="background:rgba(255,255,255,.04); border-color:var(--line); color:var(--text)">-</button>
+                        <span id="display-household-size" class="text-xs font-mono font-bold w-4 text-center" style="color:var(--gold)">1</span>
+                        <button type="button" onclick="adjustHouseholdSize(1)" class="w-7 h-7 rounded-xl border font-bold flex items-center justify-center" style="background:rgba(255,255,255,.04); border-color:var(--line); color:var(--text)">+</button>
                       </div>
                     </div>
                     <div class="space-y-2 pt-2 border-t" style="border-color:var(--line)">
-                      <div class="flex justify-between text-xs">
+                      <div class="flex justify-between text-xs font-medium">
                         <span style="color:var(--muted)">Household waste</span>
-                        <span class="font-mono" style="color:var(--gold)"><span id="val-waste">0</span> kg</span>
+                        <span class="font-mono font-bold" style="color:var(--gold)"><span id="val-waste">0</span> kg</span>
                       </div>
                       <input type="range" id="input-waste" min="0" max="100" value="0" step="0.5" oninput="document.getElementById('val-waste').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
                     </div>
@@ -597,25 +593,25 @@
               <div id="factory-inputs" class="hidden space-y-4">
                 <div class="p-4 rounded-2xl border space-y-3" style="background:rgba(255,255,255,.025); border-color:var(--line)">
                   <div>
-                    <label class="block text-xs mb-1" style="color:var(--brick)">Boiler coal (tons)</label>
-                    <input type="number" id="input-coal" step="0.1" min="0" placeholder="e.g. 2.5" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs"/>
+                    <label class="block text-xs font-semibold mb-1" style="color:var(--brick)">Boiler coal (tons)</label>
+                    <input type="number" id="input-coal" step="0.1" min="0" placeholder="e.g. 2.5" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs font-semibold"/>
                   </div>
                   <div class="grid grid-cols-2 gap-3">
                     <div>
-                      <label class="block text-xs mb-1" style="color:var(--gold)">Hazardous waste (kg)</label>
-                      <input type="number" id="input-haz-waste" step="1" min="0" placeholder="e.g. 50" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs"/>
+                      <label class="block text-xs font-semibold mb-1" style="color:var(--gold)">Hazardous waste (kg)</label>
+                      <input type="number" id="input-haz-waste" step="1" min="0" placeholder="e.g. 50" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs font-semibold"/>
                     </div>
                     <div>
-                      <label class="block text-xs mb-1" style="color:var(--gold)">Solid waste (kg)</label>
-                      <input type="number" id="input-solid-waste" step="1" min="0" placeholder="e.g. 200" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs"/>
+                      <label class="block text-xs font-semibold mb-1" style="color:var(--gold)">Solid waste (kg)</label>
+                      <input type="number" id="input-solid-waste" step="1" min="0" placeholder="e.g. 200" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs font-semibold"/>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div>
-                <label class="block text-xs mb-1.5 text-electricGreen">Buy an offset directly (kg CO2)</label>
-                <input type="number" id="input-direct-offset" step="0.1" min="0" placeholder="e.g. 25.0" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs"/>
+                <label class="block text-xs font-semibold mb-1.5 text-electricGreen">Buy an offset directly (kg CO2)</label>
+                <input type="number" id="input-direct-offset" step="0.1" min="0" placeholder="e.g. 25.0" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs font-semibold"/>
               </div>
 
               <div class="p-4 rounded-2xl border text-xs space-y-2 font-mono" style="background:rgba(255,255,255,.025); border-color:var(--line)">
@@ -638,23 +634,23 @@
         <div id="panel-ledger" class="dash-panel hidden space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <div class="editorial-card p-6 rounded-[20px]">
-              <h3 class="text-xs uppercase tracking-wider mb-4">Released vs avoided</h3>
+              <h3 class="text-xs font-semibold uppercase tracking-wider mb-4">Released vs avoided</h3>
               <div class="h-48"><canvas id="categoryChart"></canvas></div>
             </div>
             <div class="editorial-card p-6 rounded-[20px]">
-              <h3 class="text-xs uppercase tracking-wider mb-4">Where it comes from</h3>
+              <h3 class="text-xs font-semibold uppercase tracking-wider mb-4">Where it comes from</h3>
               <div class="h-48"><canvas id="donutChart"></canvas></div>
             </div>
           </div>
 
           <div class="editorial-card p-6 sm:p-8 rounded-[20px]">
-            <h3 class="text-sm mb-4 uppercase tracking-wider">Activity ledger</h3>
+            <h3 class="text-sm font-semibold mb-4 uppercase tracking-wider">Activity ledger</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs">
                 <thead class="uppercase text-[9px] font-mono tracking-widest" style="color:var(--muted)">
                   <tr><th class="p-3.5">Date</th><th class="p-3.5">Activity</th><th class="p-3.5">Released</th><th class="p-3.5">Avoided</th><th class="p-3.5">Trees</th><th class="p-3.5 text-right">Action</th></tr>
                 </thead>
-                <tbody id="logs-table-body" class="divide-y font-mono" style="border-color:var(--line)"></tbody>
+                <tbody id="logs-table-body" class="divide-y font-mono font-semibold" style="border-color:var(--line)"></tbody>
               </table>
             </div>
           </div>
@@ -663,13 +659,13 @@
         <!-- ============ LEADERBOARD PANEL ============ -->
         <div id="panel-leaderboard" class="dash-panel hidden">
           <div class="editorial-card p-6 sm:p-8 rounded-[20px]">
-            <h3 class="text-sm mb-4 uppercase tracking-wider">Community leaderboard</h3>
+            <h3 class="text-sm font-semibold mb-4 uppercase tracking-wider">Community leaderboard</h3>
             <div class="overflow-x-auto">
               <table class="w-full text-left text-xs">
                 <thead class="uppercase text-[9px] font-mono tracking-widest" style="color:var(--muted)">
                   <tr><th class="p-3.5">Rank</th><th class="p-3.5">Account</th><th class="p-3.5">Type</th><th class="p-3.5">Avoided</th><th class="p-3.5 text-right">Credits</th></tr>
                 </thead>
-                <tbody id="leaderboard-body" class="divide-y font-mono" style="border-color:var(--line)"></tbody>
+                <tbody id="leaderboard-body" class="divide-y font-mono font-semibold" style="border-color:var(--line)"></tbody>
               </table>
             </div>
           </div>
@@ -683,7 +679,7 @@
                 <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:rgba(47,174,125,.14)">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="#34d399" stroke-width="1.7"/><path d="M8 9h8M8 13h8M8 17h4" stroke="#34d399" stroke-width="1.6" stroke-linecap="round"/></svg>
                 </div>
-                <h4 class="text-sm mb-1">Export CSV</h4>
+                <h4 class="text-sm font-semibold mb-1">Export CSV</h4>
                 <p class="text-xs" style="color:var(--muted)">Every logged entry, raw, for your own spreadsheet or accounting tools.</p>
               </div>
               <button onclick="downloadCSV()" class="mt-5 w-full btn-editorial text-xs py-3 rounded-xl uppercase tracking-widest">Download CSV</button>
@@ -694,7 +690,7 @@
                 <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:rgba(217,196,143,.14)">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="6" stroke="#d9c48f" stroke-width="1.7"/><path d="M8.5 14.5L7 21l5-2.5L17 21l-1.5-6.5" stroke="#d9c48f" stroke-width="1.6" stroke-linejoin="round"/></svg>
                 </div>
-                <h4 class="text-sm mb-1">Certificate</h4>
+                <h4 class="text-sm font-semibold mb-1">Certificate</h4>
                 <p class="text-xs" style="color:var(--muted)">A shareable statement of your total offsets and credits earned to date.</p>
               </div>
               <button onclick="downloadPDF()" class="mt-5 w-full btn-editorial text-xs py-3 rounded-xl uppercase tracking-widest" style="background:linear-gradient(135deg,var(--gold),#8a6f37)">Download PDF</button>
@@ -705,7 +701,7 @@
                 <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:rgba(47,174,125,.14)">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 19V9l5-5 5 5v10M14 19v-6l4-4 2 2v8" stroke="#34d399" stroke-width="1.6" stroke-linejoin="round"/></svg>
                 </div>
-                <h4 class="text-sm mb-1">Monthly report</h4>
+                <h4 class="text-sm font-semibold mb-1">Monthly report</h4>
                 <p class="text-xs" style="color:var(--muted)">A full breakdown of this month's activity against your cap.</p>
               </div>
               <button onclick="downloadMonthlyPDF()" class="mt-5 w-full btn-editorial text-xs py-3 rounded-xl uppercase tracking-widest">Download report</button>
@@ -719,11 +715,11 @@
             <div class="absolute -right-16 -top-20 h-56 w-56 rounded-full blur-3xl pointer-events-none" style="background:rgba(217,196,143,.12)"></div>
             <div class="relative flex flex-col sm:flex-row items-center sm:items-start gap-6">
               <div class="relative group flex-shrink-0">
-                <div class="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center text-3xl" style="background:linear-gradient(135deg,var(--green-500),var(--gold)); box-shadow:0 0 0 4px rgba(217,196,143,.15), 0 20px 44px -12px rgba(0,0,0,.7);">
+                <div class="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center text-3xl font-bold" style="background:linear-gradient(135deg,var(--green-500),var(--gold)); box-shadow:0 0 0 4px rgba(217,196,143,.15), 0 20px 44px -12px rgba(0,0,0,.7);">
                   <img id="profile-avatar-img" class="avatar-img hidden w-full h-full object-cover" src="" alt="" />
                   <span id="profile-avatar-fallback" class="avatar-fallback text-white">U</span>
                 </div>
-                <label for="avatar-file-input" class="absolute inset-0 rounded-full flex items-center justify-center text-center px-2 text-[9px] uppercase tracking-widest text-white opacity-0 group-hover:opacity-100 cursor-pointer transition" style="background:rgba(4,10,8,.68);">
+                <label for="avatar-file-input" class="absolute inset-0 rounded-full flex items-center justify-center text-center px-2 text-[9px] font-bold uppercase tracking-widest text-white opacity-0 group-hover:opacity-100 cursor-pointer transition" style="background:rgba(4,10,8,.68);">
                   Change photo
                 </label>
                 <input type="file" id="avatar-file-input" accept="image/*" onchange="handleAvatarUpload(event)" class="hidden"/>
@@ -732,7 +728,7 @@
                 <div class="premium-pill inline-flex items-center gap-2 rounded-full px-3 py-1 text-[9px] uppercase tracking-[.2em] font-mono mb-2" style="border:1px solid rgba(217,196,143,.3); background:rgba(217,196,143,.08); color:#eddcae;">
                   <span>✦</span> Premium member
                 </div>
-                <h2 id="profile-display-name" class="text-2xl text-white">—</h2>
+                <h2 id="profile-display-name" class="text-2xl font-semibold text-white">—</h2>
                 <p id="profile-email-display" class="text-xs mt-1" style="color:var(--muted)">—</p>
                 <p id="profile-member-since" class="text-[10px] font-mono uppercase tracking-widest mt-2" style="color:var(--muted)">Member since —</p>
               </div>
@@ -742,36 +738,36 @@
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div class="editorial-card p-5 rounded-[18px] text-center">
               <p class="text-[9px] font-mono uppercase tracking-widest" style="color:var(--muted)">Lifetime avoided</p>
-              <p id="profile-stat-saved" class="text-2xl text-matrixNeon mt-2">0.00 kg</p>
+              <p id="profile-stat-saved" class="text-2xl font-semibold text-matrixNeon mt-2">0.00 kg</p>
             </div>
             <div class="editorial-card p-5 rounded-[18px] text-center">
               <p class="text-[9px] font-mono uppercase tracking-widest" style="color:var(--muted)">Net credits</p>
-              <p id="profile-stat-credits" class="text-2xl text-electricGreen mt-2">0.00000</p>
+              <p id="profile-stat-credits" class="text-2xl font-semibold text-electricGreen mt-2">0.00000</p>
             </div>
             <div class="editorial-card p-5 rounded-[18px] text-center">
               <p class="text-[9px] font-mono uppercase tracking-widest" style="color:var(--muted)">Entries logged</p>
-              <p id="profile-stat-entries" class="text-2xl text-white mt-2">0</p>
+              <p id="profile-stat-entries" class="text-2xl font-semibold text-white mt-2">0</p>
             </div>
           </div>
 
           <div class="editorial-card p-6 sm:p-8 rounded-[20px]">
-            <h3 class="text-sm uppercase tracking-wider mb-5">Edit profile</h3>
+            <h3 class="text-sm font-semibold uppercase tracking-wider mb-5">Edit profile</h3>
             <form id="profile-form" onsubmit="handleProfileSave(event)" class="space-y-4 max-w-lg">
               <div>
-                <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">Display name</label>
-                <input type="text" id="profile-name-input" class="w-full editorial-input rounded-2xl px-4 py-3 text-sm"/>
+                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">Display name</label>
+                <input type="text" id="profile-name-input" class="w-full editorial-input rounded-2xl px-4 py-3 text-sm font-medium"/>
               </div>
               <div>
-                <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">Email</label>
-                <input type="email" id="profile-email-input" disabled class="w-full editorial-input rounded-2xl px-4 py-3 text-sm opacity-60 cursor-not-allowed"/>
+                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">Email</label>
+                <input type="email" id="profile-email-input" disabled class="w-full editorial-input rounded-2xl px-4 py-3 text-sm font-medium opacity-60 cursor-not-allowed"/>
               </div>
               <div>
-                <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">About / location</label>
-                <textarea id="profile-bio-input" rows="3" placeholder="Where you're offsetting from…" class="w-full editorial-input rounded-2xl px-4 py-3 text-sm resize-none"></textarea>
+                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">About / location</label>
+                <textarea id="profile-bio-input" rows="3" placeholder="Where you're offsetting from…" class="w-full editorial-input rounded-2xl px-4 py-3 text-sm font-medium resize-none"></textarea>
               </div>
               <div>
-                <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">Account type</label>
-                <input type="text" id="profile-type-input" disabled class="w-full editorial-input rounded-2xl px-4 py-3 text-sm opacity-60 cursor-not-allowed capitalize"/>
+                <label class="block text-[10px] font-bold uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">Account type</label>
+                <input type="text" id="profile-type-input" disabled class="w-full editorial-input rounded-2xl px-4 py-3 text-sm font-medium opacity-60 cursor-not-allowed capitalize"/>
               </div>
               <button type="submit" class="btn-editorial text-xs px-6 py-3.5 rounded-2xl uppercase tracking-widest">Save changes</button>
             </form>
@@ -809,7 +805,7 @@
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
       const bgColor = type === 'success' ? 'bg-trueBlack border-matrixNeon/40 text-matrixNeon' : 'bg-trueBlack border-rose-400/40 text-rose-300';
-      toast.className = `pointer-events-auto border backdrop-blur-xl ${bgColor} text-xs px-5 py-4 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-3 opacity-0 flex items-center space-x-3`;
+      toast.className = `pointer-events-auto border backdrop-blur-xl ${bgColor} text-xs font-semibold px-5 py-4 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-3 opacity-0 flex items-center space-x-3`;
       toast.innerHTML = `<span class="text-base">${type === 'success' ? '◆' : '⚠️'}</span> <span class="tracking-wide">${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => toast.classList.remove('translate-y-3', 'opacity-0'), 50);
@@ -885,7 +881,7 @@
         navigator.geolocation.clearWatch(watchId);
         watchId = null;
         trackingBtn.innerHTML = "<span>Track this trip with GPS</span>";
-        trackingBtn.className = "w-full text-xs py-3 rounded-xl transition flex items-center justify-center space-x-2 text-matrixNeon";
+        trackingBtn.className = "w-full text-xs font-semibold py-3 rounded-xl transition flex items-center justify-center space-x-2 text-matrixNeon";
         trackingBtn.style.background = "rgba(47,174,125,.12)";
         trackingBtn.style.border = "1px solid rgba(47,174,125,.28)";
         showToast(`Route logged: ${totalTripKm.toFixed(2)} km`, 'success');
@@ -894,7 +890,7 @@
       if (!('geolocation' in navigator)) { showToast('GPS is unavailable on this device.', 'error'); return; }
       tripCoordinates = []; totalTripKm = 0;
       trackingBtn.innerHTML = "<span>Stop &amp; save trip</span>";
-      trackingBtn.className = "w-full text-xs py-3 rounded-xl transition flex items-center justify-center space-x-2";
+      trackingBtn.className = "w-full text-xs font-semibold py-3 rounded-xl transition flex items-center justify-center space-x-2";
       trackingBtn.style.background = "rgba(224,130,123,.14)";
       trackingBtn.style.border = "1px solid rgba(224,130,123,.35)";
       trackingBtn.style.color = "var(--brick)";
@@ -1036,7 +1032,13 @@
       }
     }
 
-    function handleLogout() { localStorage.clear(); navigateTo('signin'); }
+    function handleLogout() { 
+      localStorage.clear(); 
+      token = null; 
+      currentUser = null; 
+      showToast('Signed out successfully.', 'success');
+      navigateTo('signin'); 
+    }
 
     function setupDashboard() {
       const isFactory = currentUser.accountType === 'factory';
