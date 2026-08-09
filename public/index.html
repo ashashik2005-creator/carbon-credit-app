@@ -1,461 +1,995 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EcoCredit Hub — Carbon Intelligence Command</title>
-  
-  <!-- Typography Fonts -->
+  <title>EcoMatrix — Carbon Intelligence</title>
+  <meta name="theme-color" content="#070b09" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
   <script>
     tailwind.config = {
-      darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: { 
-            sans: ['Plus Jakarta Sans', 'sans-serif'], 
-            display: ['Space Grotesk', 'sans-serif'] 
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            display: ['Fraunces', 'serif'],
+            mono: ['IBM Plex Mono', 'monospace']
           },
           colors: {
-            obsidian: '#030712',
-            emeraldAccent: '#10b981',
-            cyberCyan: '#06b6d4',
-            ambientPurple: '#a855f7'
+            trueBlack: '#0b1310',
+            deepForestPanel: '#0b3d2e',
+            matrixNeon: '#34d399',
+            cyberEmerald: '#0f4f3b',
+            electricGreen: '#7ef7c4'
           }
         }
       }
     }
   </script>
-  
+
   <style>
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #030712; }
-    ::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.25); border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: rgba(16, 185, 129, 0.5); }
+    :root {
+      --bg: #07100c;
+      --surface: rgba(24, 33, 29, 0.62);
+      --surface-solid: #131c18;
+      --surface-2: rgba(255, 255, 255, 0.035);
+      --ink: #f3f7f3;
+      --text: #cdd8d1;
+      --muted: #85958c;
+      --line: rgba(244, 247, 243, .09);
+      --line-strong: rgba(244, 247, 243, .18);
+      --green-900: #06251a;
+      --green-800: #0c3a29;
+      --green-700: #12523a;
+      --green-600: #1c8a63;
+      --green-500: #2fae7d;
+      --green-400: #4fd39b;
+      --green-100: rgba(47, 174, 125, .14);
+      --gold: #d9c48f;
+      --gold-light: #eddcae;
+      --brick: #e0827b;
+      --brick-100: rgba(224, 130, 123, .14);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
 
     body {
-      background-color: #030712;
-      background-image: 
-        radial-gradient(at 10% 10%, rgba(16, 185, 129, 0.15) 0px, transparent 45%),
-        radial-gradient(at 90% 15%, rgba(6, 182, 212, 0.15) 0px, transparent 45%),
-        radial-gradient(at 50% 95%, rgba(168, 85, 247, 0.12) 0px, transparent 50%);
-      background-attachment: fixed;
+      margin: 0;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-weight: 700 !important;
+      background:
+        radial-gradient(1100px 700px at 10% -12%, rgba(28,138,99,.20), transparent 60%),
+        radial-gradient(900px 620px at 105% 8%, rgba(217,196,143,.09), transparent 55%),
+        radial-gradient(1300px 820px at 50% 122%, rgba(11,61,46,.45), transparent 62%),
+        var(--bg);
+      min-height: 100vh;
+      position: relative;
     }
 
-    .neo-glass {
-      background: rgba(15, 23, 42, 0.55);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    h1, h2, h3, h4, .font-display, strong, b, span, p, label, input, select, button, th, td, a {
+      font-weight: 800 !important;
+    }
+    h1,h2,h3,h4,.font-display { font-family:'Fraunces',serif !important; letter-spacing:-.015em; color: var(--ink); }
+    ::selection { background: var(--green-500); color:#07100c; }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: var(--surface-solid); }
+    ::-webkit-scrollbar-thumb { background: var(--green-600); border-radius: 99px; }
+
+    #ambient-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: .85;
     }
 
-    .neo-glass-card {
-      background: rgba(15, 23, 42, 0.45);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    .editorial-card, .editorial-panel {
+      position:relative;
+      background: var(--surface);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border:1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.03), 0 24px 60px -30px rgba(0,0,0,.85);
+      transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
     }
-    .neo-glass-card:hover {
-      border-color: rgba(16, 185, 129, 0.35);
-      box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.2);
-      transform: translateY(-2px);
+    .editorial-card::before, .editorial-panel::before {
+      content:"";
+      position:absolute; left:22px; right:22px; top:0; height:3px;
+      background: linear-gradient(90deg, var(--green-500), var(--gold-light));
+      border-radius: 0 0 3px 3px;
+      opacity:.9;
     }
-
-    .glass-input {
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.25s ease;
-    }
-    .glass-input:focus {
-      border-color: #10b981;
-      box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
-      outline: none;
-    }
-
-    .btn-gradient {
-      background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
-      box-shadow: 0 4px 20px -2px rgba(16, 185, 129, 0.4);
-      transition: all 0.3s ease;
-    }
-    .btn-gradient:hover {
-      box-shadow: 0 8px 30px 0px rgba(6, 182, 212, 0.6);
-      transform: translateY(-1px);
+    .editorial-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(79,211,155,.35);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 34px 70px -28px rgba(31,138,99,.38);
     }
 
-    input[type=range] { -webkit-appearance: none; background: rgba(255, 255, 255, 0.08); border-radius: 9999px; height: 6px; }
+    .editorial-input {
+      background: rgba(255,255,255,.035);
+      border:1px solid rgba(244,247,243,.14);
+      color: var(--ink);
+      font-weight: 800 !important;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .editorial-input::placeholder { color:#63756b; font-weight: 800 !important; }
+    .editorial-input:hover { border-color: rgba(244,247,243,.26); }
+    .editorial-input:focus {
+      outline:none;
+      border-color: var(--green-500);
+      background: rgba(255,255,255,.05);
+      box-shadow: 0 0 0 4px rgba(47,174,125,.16);
+    }
+
+    .btn-editorial {
+      position:relative; overflow:hidden; border:0;
+      background: linear-gradient(135deg, var(--green-500), var(--green-800));
+      color:#f7faf8; font-weight:900 !important;
+      box-shadow: 0 12px 30px rgba(31,138,99,.42), inset 0 1px 0 rgba(255,255,255,.16);
+      transition: transform .22s ease, box-shadow .22s ease, filter .22s ease;
+    }
+    .btn-editorial::before {
+      content:""; position:absolute; inset:0; transform:translateX(-120%);
+      background: linear-gradient(100deg, transparent, rgba(255,255,255,.30), transparent);
+      transition: transform .6s ease;
+    }
+    .btn-editorial:hover { transform: translateY(-2px); box-shadow: 0 18px 40px rgba(31,138,99,.5), inset 0 1px 0 rgba(255,255,255,.2); }
+    .btn-editorial:hover::before { transform: translateX(120%); }
+
+    input[type=range] {
+      -webkit-appearance:none; appearance:none;
+      background: linear-gradient(90deg, rgba(47,174,125,.45), rgba(47,174,125,.08));
+      border:1px solid rgba(244,247,243,.10);
+      border-radius:999px; height:6px;
+    }
     input[type=range]::-webkit-slider-thumb {
-      -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%;
-      background: #10b981; cursor: pointer; box-shadow: 0 0 12px #10b981;
-      transition: transform 0.15s ease;
+      -webkit-appearance:none; height:17px; width:17px; border-radius:50%;
+      background: var(--green-400); cursor:pointer;
+      border:3px solid #0c1712;
+      box-shadow: 0 0 0 1px rgba(79,211,155,.4), 0 4px 14px rgba(31,138,99,.5);
     }
-    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+    .premium-pill {
+      animation: pillGlow 2.6s ease-in-out infinite;
+    }
+    @keyframes pillGlow {
+      0%,100% { box-shadow: 0 0 0 0 rgba(217,196,143,.35); }
+      50% { box-shadow: 0 0 0 7px rgba(217,196,143,0); }
+    }
+
+    .avatar-fallback { font-family:'Fraunces',serif; }
+
+    #signin-view, #signup-view { min-height:100vh; padding:28px; position:relative; z-index:1; }
+    #signin-view::before, #signup-view::before {
+      content:""; position:absolute; width:600px; height:600px; left:-220px; top:-220px;
+      border-radius:50%; background: radial-gradient(circle, rgba(47,174,125,.16), transparent 70%);
+      pointer-events:none;
+    }
+    #signin-view > .editorial-panel, #signup-view > .editorial-panel {
+      max-width:440px !important; border-radius:26px !important; padding:42px !important;
+    }
+    #signin-view .inline-flex, #signup-view .inline-flex {
+      width:66px !important; height:66px !important; border-radius:18px !important;
+      background: linear-gradient(150deg, rgba(47,174,125,.18), rgba(255,255,255,.02)) !important;
+      box-shadow: inset 0 0 0 1px rgba(244,247,243,.10) !important;
+    }
+    #signin-view h1, #signup-view h1 { font-size:1.85rem; }
+    #signin-view form, #signup-view form { margin-top:24px; }
+    #signin-view label, #signup-view label { color: var(--muted) !important; font-size:10px !important; }
+
+    #dashboard-view { display:flex; min-height:100vh; position:relative; z-index:1; }
+
+    #app-sidebar {
+      width: 264px; flex-shrink:0;
+      background: linear-gradient(180deg, #081b14, #040d0a);
+      border-right: 1px solid rgba(244,247,243,.06);
+      color:#e9f3ee;
+      position: fixed; top:0; bottom:0; left:0;
+      display:flex; flex-direction:column;
+      z-index:40;
+    }
+    #app-sidebar .nav-item {
+      display:flex; align-items:center; gap:11px;
+      padding: 11px 16px; border-radius:12px;
+      font-size:13px; font-weight:800 !important; color: rgba(233,243,238,.62);
+      border-left: 3px solid transparent;
+      transition: background .2s ease, color .2s ease;
+      cursor:pointer;
+    }
+    #app-sidebar .nav-item:hover { background: rgba(255,255,255,.05); color:#fff; }
+    #app-sidebar .nav-item.active {
+      background: rgba(47,174,125,.14); color:#fff;
+      border-left-color: var(--gold-light);
+    }
+    #app-sidebar .nav-item svg { flex-shrink:0; opacity:.9; }
+
+    #main-wrap { margin-left:264px; flex:1; min-width:0; position:relative; }
+
+    #app-topbar {
+      background: rgba(7,16,12,.72); backdrop-filter: blur(16px);
+      border-bottom:1px solid var(--line);
+      position:sticky; top:0; z-index:30;
+    }
+
+    .metrics-grid > .editorial-card { min-height:150px; display:flex; flex-direction:column; justify-content:center; }
+
+    table { border-collapse:separate; border-spacing:0 5px; }
+    thead tr { background: rgba(255,255,255,.03) !important; }
+    tbody tr { background: rgba(255,255,255,.015); transition: background .2s ease; }
+    tbody tr:hover { background: rgba(47,174,125,.12); }
+    tbody td:first-child, thead th:first-child { border-radius:10px 0 0 10px; }
+    tbody td:last-child, thead th:last-child { border-radius:0 10px 10px 0; }
+
+    #toast-container > div { border-radius:14px !important; box-shadow: 0 24px 50px rgba(0,0,0,.5) !important; }
+
+    canvas.chart-canvas, #panel-ledger canvas { filter: drop-shadow(0 6px 18px rgba(0,0,0,.35)); }
+
+    .gauge-wrap { position:relative; width:100%; max-width:260px; margin:0 auto; }
+    #gauge-needle-group { transform-origin: 130px 130px; transition: transform .9s cubic-bezier(.2,.9,.25,1); }
+
+    .dash-panel { animation: panelIn .4s ease; }
+    @keyframes panelIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:none; } }
+
+    #main-wrap .text-slate-400 { color: var(--muted) !important; }
+    #main-wrap .text-slate-300 { color: var(--text) !important; }
+    #main-wrap .text-white { color: var(--ink) !important; }
+
+    @media (max-width: 1024px) {
+      #app-sidebar {
+        position: static; width:100%; height:auto; flex-direction:row;
+        overflow-x:auto; padding:10px 14px !important; gap:6px;
+      }
+      #app-sidebar #sidebar-nav { flex-direction:row !important; overflow-x:auto; }
+      #app-sidebar .nav-item { white-space:nowrap; }
+      #app-sidebar #sidebar-footer { display:none; }
+      #main-wrap { margin-left:0; }
+      #dashboard-view { flex-direction:column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior:auto !important; transition:none !important; animation:none !important; }
+    }
   </style>
 </head>
-<body class="text-slate-100 font-sans min-h-screen relative overflow-x-hidden selection:bg-emeraldAccent selection:text-obsidian">
+<body class="min-h-screen relative overflow-x-hidden font-bold">
 
-  <!-- Toast Notification Container -->
+  <canvas id="ambient-canvas"></canvas>
+
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none"></div>
 
-  <!-- 1. SIGN-IN VIEW -->
+  <!-- SIGN IN VIEW -->
   <div id="signin-view" class="relative z-10 min-h-screen flex items-center justify-center p-4">
-    <div class="neo-glass p-8 sm:p-10 rounded-3xl w-full max-w-md relative overflow-hidden">
-      <div class="absolute -top-16 -right-16 w-36 h-36 bg-ambientPurple/20 rounded-full blur-3xl pointer-events-none"></div>
-      
+    <div class="editorial-panel p-8 sm:p-12 rounded-[2.5rem] w-full max-w-md relative overflow-hidden">
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-emeraldAccent/20 to-cyberCyan/20 text-emeraldAccent border border-emeraldAccent/30 mb-4 shadow-inner">
-          🌱
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-4">
+          <svg width="30" height="30" viewBox="0 0 40 40" fill="none"><path d="M20 4 A16 16 0 0 1 36 20" stroke="#4fd39b" stroke-width="2.2" stroke-linecap="round"/><path d="M4 20 A16 16 0 0 1 20 4" stroke="#2fae7d" stroke-width="2.2" stroke-linecap="round"/><circle cx="20" cy="20" r="2.4" fill="#d9c48f"/><line x1="20" y1="20" x2="26" y2="12" stroke="#eddcae" stroke-width="1.8" stroke-linecap="round"/></svg>
         </div>
-        <h1 class="text-3xl font-extrabold font-display tracking-tight text-white">EcoCredit <span class="bg-gradient-to-r from-emeraldAccent via-cyberCyan to-ambientPurple bg-clip-text text-transparent">Hub</span></h1>
-        <p class="text-slate-400 text-xs mt-2 font-medium tracking-wide">Carbon Tracking & Management Platform</p>
+        <h1 class="text-3xl tracking-tight">EcoMatrix</h1>
+        <p class="text-[10px] mt-2 font-mono uppercase tracking-widest" style="color:var(--muted)">Carbon Intelligence Workspace</p>
       </div>
 
-      <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-5">
+      <form id="signin-form" onsubmit="handleSignIn(event)" class="space-y-4">
         <div>
-          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-widest mb-1.5">Username or Email</label>
-          <input type="text" id="signin-identifier" required placeholder="Enter your username or email" class="w-full glass-input rounded-xl px-4 py-3 text-xs text-white"/>
+          <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono">Email or username</label>
+          <input type="text" id="signin-identifier" required placeholder="you@example.com" class="w-full editorial-input rounded-2xl px-4 py-3.5 text-sm"/>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-widest mb-1.5">Password</label>
-          <input type="password" id="signin-password" required placeholder="••••••••" class="w-full glass-input rounded-xl px-4 py-3 text-xs text-white"/>
+          <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono">Password</label>
+          <input type="password" id="signin-password" required placeholder="••••••••" class="w-full editorial-input rounded-2xl px-4 py-3.5 text-sm"/>
         </div>
-        <button type="submit" class="w-full btn-gradient text-obsidian font-black text-xs py-3.5 rounded-xl uppercase tracking-widest mt-2">Sign In</button>
+        <button type="submit" class="w-full btn-editorial text-xs py-4 rounded-2xl uppercase tracking-widest mt-2">Sign in</button>
       </form>
-      
-      <div class="mt-8 pt-6 border-t border-white/10 text-center">
-        <p class="text-xs text-slate-400">New to EcoCredit Hub? <button onclick="navigateTo('signup')" class="text-emeraldAccent font-bold hover:underline">Create an Account</button></p>
+
+      <div class="mt-8 pt-6 border-t text-center" style="border-color:var(--line)">
+        <p class="text-xs" style="color:var(--muted)">New here? <button onclick="navigateTo('signup')" class="hover:underline" style="color:var(--green-400)">Create an account</button></p>
       </div>
     </div>
   </div>
 
-  <!-- 2. REGISTER VIEW -->
+  <!-- REGISTER VIEW -->
   <div id="signup-view" class="hidden relative z-10 min-h-screen flex items-center justify-center p-4">
-    <div class="neo-glass p-8 sm:p-10 rounded-3xl w-full max-w-md relative overflow-hidden">
+    <div class="editorial-panel p-8 sm:p-12 rounded-[2.5rem] w-full max-w-md relative overflow-hidden">
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyberCyan/20 to-ambientPurple/20 text-cyberCyan border border-cyberCyan/30 mb-4 shadow-inner">
-          🌍
+        <div class="inline-flex items-center justify-center w-20 h-20 rounded-3xl mb-4">
+          <svg width="28" height="28" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="15" stroke="#4fd39b" stroke-width="2"/><path d="M20 12v16M12 20h16" stroke="#2fae7d" stroke-width="2" stroke-linecap="round"/></svg>
         </div>
-        <h1 class="text-2xl font-extrabold font-display text-white">Create an Account</h1>
+        <h1 class="text-2xl">Create your account</h1>
+        <p class="text-[10px] mt-1 font-mono uppercase tracking-widest" style="color:var(--muted)">Set up your ledger</p>
       </div>
 
       <form id="signup-form" onsubmit="handleSignUp(event)" class="space-y-4">
         <div>
-          <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Username</label>
-          <input type="text" id="signup-username" required placeholder="Choose a username" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white"/>
+          <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono">Username</label>
+          <input type="text" id="signup-username" required placeholder="Choose a username" class="w-full editorial-input rounded-2xl px-4 py-3 text-sm"/>
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Email Address</label>
-          <input type="email" id="signup-email" required placeholder="name@example.com" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white"/>
+          <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono">Email</label>
+          <input type="email" id="signup-email" required placeholder="name@example.com" class="w-full editorial-input rounded-2xl px-4 py-3 text-sm"/>
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Password</label>
-          <input type="password" id="signup-password" required minlength="6" placeholder="At least 6 characters" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white"/>
+          <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono">Password</label>
+          <input type="password" id="signup-password" required minlength="6" placeholder="At least 6 characters" class="w-full editorial-input rounded-2xl px-4 py-3 text-sm"/>
         </div>
         <div>
-          <label class="block text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-1">Account Type</label>
-          <select id="signup-type" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white">
-            <option value="person" class="bg-obsidian text-white">👤 Individual / Commuter</option>
-            <option value="factory" class="bg-obsidian text-white">🏭 Factory / Industrial Plant</option>
+          <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono">Account type</label>
+          <select id="signup-type" class="w-full editorial-input rounded-2xl px-4 py-3 text-sm">
+            <option value="person">Individual — track commuting &amp; home energy</option>
+            <option value="factory">Facility — track industrial output</option>
           </select>
         </div>
-        <button type="submit" class="w-full btn-gradient text-obsidian font-black text-xs py-3.5 rounded-xl uppercase tracking-widest mt-2">Register Account</button>
+        <button type="submit" class="w-full btn-editorial text-xs py-4 rounded-2xl uppercase tracking-widest mt-2">Create account</button>
       </form>
       <div class="mt-6 text-center">
-        <p class="text-xs text-slate-400">Already registered? <button onclick="navigateTo('signin')" class="text-emeraldAccent font-bold hover:underline">Sign In</button></p>
+        <p class="text-xs" style="color:var(--muted)">Already have an account? <button onclick="navigateTo('signin')" class="hover:underline" style="color:var(--green-400)">Sign in</button></p>
       </div>
     </div>
   </div>
 
-  <!-- 3. MAIN DASHBOARD VIEW -->
-  <div id="dashboard-view" class="hidden relative z-10 min-h-screen pb-16">
-    
-    <header class="border-b border-white/10 bg-obsidian/70 backdrop-blur-2xl sticky top-0 z-40">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emeraldAccent to-cyberCyan flex items-center justify-center text-obsidian font-black text-xl shadow-lg shadow-emeraldAccent/20">
-            🌱
-          </div>
-          <div>
-            <span class="font-extrabold font-display text-xl text-white tracking-tight">EcoCredit <span class="bg-gradient-to-r from-emeraldAccent to-cyberCyan bg-clip-text text-transparent">Hub</span></span>
-            <span class="block text-[9px] font-mono text-slate-400 uppercase tracking-widest">Dashboard</span>
-          </div>
-        </div>
+  <!-- DASHBOARD VIEW -->
+  <div id="dashboard-view" class="hidden">
 
-        <div class="flex items-center space-x-2 sm:space-x-3">
-          <span id="account-type-badge" class="text-[10px] font-mono font-bold px-3 py-1.5 rounded-xl bg-obsidian border border-emeraldAccent/30 text-cyberCyan uppercase tracking-wider">Commuter Mode</span>
-          <button onclick="downloadCSV()" class="hidden sm:flex text-xs font-bold bg-obsidian border border-white/10 text-emeraldAccent px-3 py-2 rounded-xl hover:bg-slate-900 transition">📥 CSV</button>
-          <button onclick="downloadPDF()" class="text-xs font-bold bg-emeraldAccent/10 border border-emeraldAccent/30 text-emeraldAccent px-3 py-2 rounded-xl hover:bg-emeraldAccent/20 transition">📜 Certificate</button>
-          <button onclick="downloadMonthlyPDF()" class="text-xs font-bold bg-cyberCyan/10 border border-cyberCyan/30 text-cyberCyan px-3 py-2 rounded-xl hover:bg-cyberCyan/20 transition">📊 Report</button>
-          <button onclick="handleLogout()" class="p-2 text-slate-400 hover:text-rose-400 transition" title="Sign Out">🚪</button>
+    <!-- SIDEBAR -->
+    <aside id="app-sidebar" class="py-6 px-4">
+      <div class="flex items-center gap-3 px-2 mb-8">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,.08)">
+          <svg width="19" height="19" viewBox="0 0 40 40" fill="none"><path d="M20 4 A16 16 0 0 1 36 20" stroke="#e9f3ee" stroke-width="2.4" stroke-linecap="round"/><circle cx="20" cy="20" r="2.6" fill="#d9c48f"/><line x1="20" y1="20" x2="27" y2="11" stroke="#e9f3ee" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="flex-1">
+          <div class="flex items-center gap-1.5">
+            <span class="text-[15px] text-white leading-none">EcoMatrix</span>
+            <span class="premium-pill text-[8px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full" style="background:rgba(217,196,143,.15); color:#eddcae; border:1px solid rgba(217,196,143,.3)">Pro</span>
+          </div>
+          <div class="text-[9px] font-mono uppercase tracking-widest mt-1" style="color:rgba(233,243,238,.5)">Workspace</div>
         </div>
       </div>
-    </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-      
-      <!-- Stats Cards -->
-      <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div class="neo-glass-card p-6 rounded-3xl relative overflow-hidden">
-          <div class="absolute top-0 right-0 p-3 opacity-10 text-rose-500 font-display font-black text-6xl pointer-events-none">CO2</div>
-          <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">Carbon Released</p>
-          <div class="flex items-baseline space-x-1.5 mt-3">
-            <span id="stat-released" class="text-4xl font-extrabold font-display text-rose-400">0.00</span>
-            <span class="text-xs text-slate-400 font-semibold">kg CO2</span>
+      <nav id="sidebar-nav" class="flex flex-col gap-1">
+        <div id="nav-overview" class="nav-item active" onclick="switchPanel('overview')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="3" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="14" y="12" width="7" height="9" rx="1.5" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="16" width="7" height="5" rx="1.5" stroke="currentColor" stroke-width="1.8"/></svg>
+          Overview
+        </div>
+        <div id="nav-log" class="nav-item" onclick="switchPanel('log')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/></svg>
+          Log activity
+        </div>
+        <div id="nav-ledger" class="nav-item" onclick="switchPanel('ledger')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 19V5a1 1 0 011-1h14a1 1 0 011 1v14l-3-2-3 2-3-2-3 2-3-2z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M8 8h8M8 11h8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Ledger
+        </div>
+        <div id="nav-leaderboard" class="nav-item" onclick="switchPanel('leaderboard')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M8 21h8M12 17v4M6 4h12v4a6 6 0 01-12 0V4z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M6 6H3v2a3 3 0 003 3M18 6h3v2a3 3 0 01-3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Leaderboard
+        </div>
+        <div id="nav-reports" class="nav-item" onclick="switchPanel('reports')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M14 3H6a1 1 0 00-1 1v16a1 1 0 001 1h12a1 1 0 001-1V8l-5-5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M14 3v5h5" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+          Reports
+        </div>
+        <div id="nav-profile" class="nav-item" onclick="switchPanel('profile')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.4" stroke="currentColor" stroke-width="1.7"/><path d="M4.8 19.2c1.4-3 4-4.6 7.2-4.6s5.8 1.6 7.2 4.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
+          Profile
+        </div>
+      </nav>
+
+      <div class="mt-auto"></div>
+      <div id="sidebar-footer" class="pt-5 mt-5 border-t space-y-3" style="border-color:rgba(255,255,255,.08)">
+        <div class="flex items-center gap-3 px-1 cursor-pointer" onclick="switchPanel('profile')">
+          <div class="relative w-10 h-10 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0" style="background:linear-gradient(135deg,var(--green-500),var(--gold));">
+            <img id="sidebar-avatar-img" class="avatar-img hidden w-full h-full object-cover" src="" alt=""/>
+            <span id="sidebar-avatar-fallback" class="avatar-fallback text-white text-xs">U</span>
+          </div>
+          <div class="min-w-0">
+            <div id="sidebar-username" class="text-xs text-white truncate">—</div>
+            <div id="sidebar-account-type" class="text-[9px] font-mono uppercase tracking-widest" style="color:#d9c48f">Individual</div>
           </div>
         </div>
+        <button onclick="handleLogout()" class="w-full flex items-center justify-center gap-2 text-xs py-2.5 rounded-xl transition" style="background:rgba(255,255,255,.05); color:rgba(233,243,238,.75)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sign out
+        </button>
+      </div>
+    </aside>
 
-        <div class="neo-glass-card p-6 rounded-3xl relative overflow-hidden">
-          <div class="absolute top-0 right-0 p-3 opacity-10 text-emeraldAccent font-display font-black text-6xl pointer-events-none">SAVED</div>
-          <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">Carbon Avoided</p>
-          <div class="flex items-baseline space-x-1.5 mt-3">
-            <span id="stat-saved" class="text-4xl font-extrabold font-display text-emeraldAccent">0.00</span>
-            <span class="text-xs text-slate-400 font-semibold">kg CO2</span>
-          </div>
+    <!-- MAIN -->
+    <div id="main-wrap">
+      <header id="app-topbar" class="px-6 sm:px-10 py-5 flex items-center justify-between">
+        <div>
+          <h2 id="panel-title" class="text-xl">Overview</h2>
+          <p id="panel-subtitle" class="text-xs mt-0.5" style="color:var(--muted)">Your carbon position at a glance</p>
         </div>
+        <button onclick="switchPanel('log')" class="hidden sm:flex btn-editorial text-xs px-5 py-2.5 rounded-xl uppercase tracking-widest">New entry</button>
+      </header>
 
-        <div class="neo-glass-card p-6 rounded-3xl relative overflow-hidden">
-          <div class="absolute top-0 right-0 p-3 opacity-10 text-cyberCyan font-display font-black text-6xl pointer-events-none">CREDIT</div>
-          <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-slate-400">Net Carbon Credits</p>
-          <div class="flex items-baseline space-x-1.5 mt-3">
-            <span id="stat-credits" class="text-3xl font-extrabold font-mono text-cyberCyan">0.00000</span>
-          </div>
-        </div>
+      <main class="px-6 sm:px-10 py-8 space-y-8 max-w-6xl">
 
-        <div class="neo-glass-card p-6 rounded-3xl relative overflow-hidden border-emeraldAccent/30">
-          <div class="absolute top-0 right-0 p-3 opacity-10 text-emeraldAccent font-display font-black text-6xl pointer-events-none">TREE</div>
-          <p class="text-[10px] font-mono font-bold uppercase tracking-widest text-emeraldAccent">Trees Needed to Offset</p>
-          <div class="flex items-baseline space-x-1.5 mt-3">
-            <span id="stat-trees-needed" class="text-4xl font-extrabold font-display text-emeraldAccent">0</span>
-            <span class="text-xs text-slate-400 font-semibold">Trees 🌲</span>
-          </div>
-        </div>
-      </section>
+        <!-- ============ OVERVIEW PANEL ============ -->
+        <div id="panel-overview" class="dash-panel space-y-8">
 
-      <!-- Monthly Target Bar -->
-      <section class="neo-glass-card p-6 rounded-3xl space-y-4">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs font-bold">
-          <div class="flex items-center space-x-3">
-            <span class="text-slate-300 font-display tracking-wide">📊 Monthly Carbon Target Cap:</span>
-            <input type="number" id="custom-budget-input" value="100" min="10" step="10" onchange="updateMonthlyBudgetCap(this.value)" class="w-24 glass-input rounded-xl px-3 py-1.5 text-xs text-emeraldAccent font-mono font-bold text-center"/>
-            <span class="text-slate-400">kg CO2</span>
-          </div>
-          <span id="budget-status" class="text-emeraldAccent font-mono">0% Utilized</span>
-        </div>
-        <div class="w-full bg-obsidian rounded-full h-3 overflow-hidden p-0.5 border border-white/10">
-          <div id="budget-bar" class="bg-gradient-to-r from-emeraldAccent via-cyberCyan to-ambientPurple h-full rounded-full transition-all duration-700 shadow-lg shadow-emeraldAccent/50" style="width: 0%"></div>
-        </div>
-      </section>
-
-      <!-- Advisor Card -->
-      <section class="neo-glass-card p-6 rounded-3xl border-emeraldAccent/30 space-y-3 relative overflow-hidden">
-        <div class="flex items-center space-x-2">
-          <span class="text-2xl">💡</span>
-          <h3 class="text-sm font-bold text-white font-display uppercase tracking-wider">Sustainability Advisor Guidance</h3>
-        </div>
-
-        <div id="advisor-response-box" class="bg-obsidian/70 p-5 rounded-2xl border border-white/10 text-xs text-slate-300 whitespace-pre-line leading-relaxed font-sans">
-          Loading your personalized eco-strategies...
-        </div>
-      </section>
-
-      <!-- Badges Showcase -->
-      <section class="neo-glass-card p-6 rounded-3xl space-y-4">
-        <h4 class="text-xs font-bold uppercase tracking-widest text-cyberCyan font-mono flex items-center space-x-2">
-          <span>🏆 Eco Achievements & Milestones</span>
-        </h4>
-        <div id="badges-container" class="grid grid-cols-2 sm:grid-cols-4 gap-4"></div>
-      </section>
-
-      <!-- Form & Visualizations Section -->
-      <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        <!-- Activity Input Form -->
-        <div class="lg:col-span-5 neo-glass-card p-6 sm:p-8 rounded-3xl space-y-6">
-          <div class="flex items-center justify-between border-b border-white/10 pb-4">
-            <h2 class="text-base font-bold text-white font-display flex items-center space-x-2">
-              <span class="text-emeraldAccent">⚡</span> 
-              <span id="form-title">Daily Activity Logger</span>
-            </h2>
-          </div>
-
-          <form id="activity-form" onsubmit="handleActivitySubmit(event)" class="space-y-5">
-            
-            <!-- COMMUTER INPUTS -->
-            <div id="person-inputs" class="space-y-4">
-              <div>
-                <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-2">Transit Mode</label>
-                <select id="person-transport-mode" onchange="calculateLivePreview()" class="w-full glass-input rounded-xl px-4 py-3 text-xs text-white">
-                  <option value="bus" class="bg-obsidian">🚌 Public Transit Bus (+0.089 kg/km)</option>
-                  <option value="gas_car" class="bg-obsidian">🚗 Gasoline Vehicle (+0.210 kg/km)</option>
-                  <option value="diesel_car" class="bg-obsidian">🚙 Diesel Vehicle (+0.170 kg/km)</option>
-                  <option value="motorcycle" class="bg-obsidian">🏍️ Motorcycle (+0.103 kg/km)</option>
-                  <option value="train" class="bg-obsidian">🚆 Electric Metro / Rail (+0.035 kg/km)</option>
-                  <option value="ev" class="bg-obsidian">⚡ Electric Vehicle / EV (+0.053 kg/km)</option>
-                  <option value="walk" class="bg-obsidian">🚲 Bicycle / Foot Walk (Saves +0.210 kg/km)</option>
-                </select>
-
-                <div class="mt-4 bg-obsidian/60 p-4 rounded-2xl border border-white/10">
-                  <div class="flex justify-between text-xs font-medium mb-2">
-                    <span class="text-slate-400">Distance Travelled</span>
-                    <span class="text-emeraldAccent font-mono font-bold"><span id="val-person-dist">0</span> km</span>
-                  </div>
-                  <input type="range" id="input-person-dist" min="0" max="150" value="0" step="1" oninput="document.getElementById('val-person-dist').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
+          <section class="relative overflow-hidden rounded-[2rem] p-7 sm:p-10 shadow-2xl" style="background:linear-gradient(135deg, #0a2d20, #040f0a); border:1px solid rgba(255,255,255,.06)">
+            <div class="absolute -right-24 -top-28 h-72 w-72 rounded-full blur-3xl" style="background:rgba(217,196,143,.12)"></div>
+            <div class="absolute -left-20 -bottom-28 h-72 w-72 rounded-full blur-3xl" style="background:rgba(47,174,125,.14)"></div>
+            <div class="relative grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-10 items-center">
+              <div class="max-w-2xl">
+                <div class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[9px] uppercase tracking-[.22em] font-mono" style="border:1px solid rgba(217,196,143,.25); background:rgba(217,196,143,.06); color:#e9dcb8">
+                  <span class="h-1.5 w-1.5 rounded-full" style="background:#d9c48f"></span>
+                  Reading live
                 </div>
+                <h1 class="mt-4 text-3xl sm:text-4xl lg:text-5xl text-white leading-[1.08]">
+                  Measure what you emit.<br class="hidden sm:block"/> <span style="color:#9fe0c2">Prove what you avoid.</span>
+                </h1>
+                <p class="mt-4 max-w-xl text-sm leading-7" style="color:rgba(233,243,238,.65)">
+                  Log a trip, a utility bill, a shift on the factory floor. EcoMatrix turns it into a calibrated reading, tracked against your monthly cap and converted into credits you can point to.
+                </p>
               </div>
 
-              <div class="grid grid-cols-1 gap-3">
-                <div class="bg-obsidian/60 p-4 rounded-2xl border border-white/10 space-y-2">
-                  <div class="flex justify-between text-xs font-medium">
-                    <span class="text-slate-400">Grid Power Draw</span>
-                    <span class="text-rose-400 font-mono font-bold"><span id="val-elec">0</span> kWh</span>
-                  </div>
-                  <input type="range" id="input-elec" min="0" max="40" value="0" step="1" oninput="document.getElementById('val-elec').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
-                </div>
-
-                <div class="bg-obsidian/60 p-4 rounded-2xl border border-white/10 space-y-2">
-                  <div class="flex justify-between text-xs font-medium">
-                    <span class="text-slate-400">Solar Generation</span>
-                    <span class="text-emeraldAccent font-mono font-bold"><span id="val-solar">0</span> kWh</span>
-                  </div>
-                  <input type="range" id="input-solar" min="0" max="40" value="0" step="1" oninput="document.getElementById('val-solar').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
-                </div>
-
-                <div class="bg-obsidian/60 p-4 rounded-2xl border border-white/10 space-y-2">
-                  <div class="flex justify-between text-xs font-medium">
-                    <span class="text-slate-400">Household Waste Output</span>
-                    <span class="text-amber-400 font-mono font-bold"><span id="val-waste">0</span> kg</span>
-                  </div>
-                  <input type="range" id="input-waste" min="0" max="25" value="0" step="0.5" oninput="document.getElementById('val-waste').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
+              <div class="gauge-wrap">
+                <svg viewBox="0 0 260 160" class="w-full">
+                  <path d="M20 130 A110 110 0 0 1 240 130" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="14" stroke-linecap="round"/>
+                  <path d="M20 130 A110 110 0 0 1 130 20" fill="none" stroke="#c96b64" stroke-width="14" stroke-linecap="round" opacity="0.6"/>
+                  <path d="M130 20 A110 110 0 0 1 240 130" fill="none" stroke="#4fbf90" stroke-width="14" stroke-linecap="round" opacity="0.75"/>
+                  <g id="gauge-needle-group" transform="rotate(0)">
+                    <line x1="130" y1="130" x2="130" y2="38" stroke="#f5f7f4" stroke-width="2.4" stroke-linecap="round"/>
+                    <circle cx="130" cy="130" r="7" fill="#0b3d2e" stroke="#d9c48f" stroke-width="2.4"/>
+                  </g>
+                  <text x="35" y="150" font-family="IBM Plex Mono" font-size="9" fill="#c96b64" letter-spacing="1">RELEASED</text>
+                  <text x="185" y="150" font-family="IBM Plex Mono" font-size="9" fill="#4fbf90" letter-spacing="1">AVOIDED</text>
+                </svg>
+                <div class="text-center -mt-4">
+                  <div id="gauge-net-value" class="text-2xl font-mono" style="color:#e9dcb8">+0.0 kg</div>
+                  <div class="text-[9px] font-mono uppercase tracking-widest mt-1" style="color:rgba(233,243,238,.5)">Net position</div>
                 </div>
               </div>
             </div>
+          </section>
 
-            <!-- FACTORY INPUTS -->
-            <div id="factory-inputs" class="hidden space-y-4">
-              <div class="bg-obsidian/60 p-4 rounded-2xl border border-white/10 space-y-3">
+          <section class="metrics-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div class="editorial-card p-6 rounded-[20px]">
+              <p class="text-[10px] font-mono uppercase tracking-widest" style="color:var(--muted)">Released</p>
+              <div class="flex items-baseline space-x-1.5 mt-3">
+                <span id="stat-released" class="text-4xl" style="color:var(--brick)">0.00</span>
+                <span class="text-xs font-mono" style="color:var(--muted)">kg CO2</span>
+              </div>
+            </div>
+            <div class="editorial-card p-6 rounded-[20px]">
+              <p class="text-[10px] font-mono uppercase tracking-widest" style="color:var(--muted)">Avoided</p>
+              <div class="flex items-baseline space-x-1.5 mt-3">
+                <span id="stat-saved" class="text-4xl text-matrixNeon">0.00</span>
+                <span class="text-xs font-mono" style="color:var(--muted)">kg CO2</span>
+              </div>
+            </div>
+            <div class="editorial-card p-6 rounded-[20px]">
+              <p class="text-[10px] font-mono uppercase tracking-widest" style="color:var(--muted)">Net credits</p>
+              <div class="flex items-baseline space-x-1.5 mt-3">
+                <span id="stat-credits" class="text-3xl font-mono text-electricGreen">0.00000</span>
+              </div>
+            </div>
+            <div class="editorial-card p-6 rounded-[20px]" style="border-color:rgba(47,174,125,.35)">
+              <p class="text-[10px] font-mono uppercase tracking-widest text-matrixNeon">Trees to offset</p>
+              <div class="flex items-baseline space-x-1.5 mt-3">
+                <span id="stat-trees-needed" class="text-4xl text-matrixNeon">0</span>
+                <span class="text-xs font-mono" style="color:var(--muted)">trees</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="editorial-card p-6 sm:p-8 rounded-[20px] space-y-3">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 text-xs">
+              <div class="flex items-center space-x-3">
+                <span>Monthly cap</span>
+                <input type="number" id="custom-budget-input" value="100" min="10" step="10" onchange="updateMonthlyBudgetCap(this.value)" class="w-24 editorial-input rounded-xl px-3 py-1.5 text-xs font-mono text-center"/>
+                <span style="color:var(--muted)">kg CO2</span>
+              </div>
+              <span id="budget-status" class="text-matrixNeon font-mono px-3.5 py-1.5 rounded-xl" style="background:rgba(47,174,125,.12)">0% used</span>
+            </div>
+            <div class="w-full rounded-full h-3 overflow-hidden p-0.5 border" style="background:rgba(255,255,255,.03); border-color:var(--line)">
+              <div id="budget-bar" class="h-full rounded-full transition-all duration-700" style="width:0%; background:linear-gradient(90deg, var(--green-400), var(--green-800))"></div>
+            </div>
+          </section>
+
+          <section class="editorial-card p-6 sm:p-8 rounded-[20px] space-y-3" style="border-color:rgba(47,174,125,.30)">
+            <div class="flex items-center space-x-3">
+              <span class="text-xl">🌿</span>
+              <h3 class="text-sm uppercase tracking-wider">Your advisor</h3>
+            </div>
+            <div id="advisor-response-box" class="p-5 rounded-2xl border text-xs whitespace-pre-line leading-relaxed" style="background:rgba(255,255,255,.025); border-color:var(--line); color:var(--text)">
+              Reading your latest telemetry…
+            </div>
+          </section>
+
+          <section class="editorial-card p-6 rounded-[20px] space-y-3">
+            <h4 class="text-xs uppercase tracking-widest text-electricGreen font-mono">Milestones</h4>
+            <div id="badges-container" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+          </section>
+        </div>
+
+        <!-- ============ LOG ACTIVITY PANEL ============ -->
+        <div id="panel-log" class="dash-panel hidden max-w-2xl">
+          <div class="editorial-card p-6 sm:p-8 rounded-[20px] space-y-6">
+            <div class="flex items-center justify-between border-b pb-4" style="border-color:var(--line)">
+              <h2 class="text-base" id="form-title">Log an activity</h2>
+            </div>
+
+            <form id="activity-form" onsubmit="handleActivitySubmit(event)" class="space-y-5">
+
+              <div class="p-4 rounded-2xl border space-y-2" style="background:rgba(255,255,255,.025); border-color:var(--line)">
+                <label class="block text-xs mb-1 text-matrixNeon">Smart receipt scanner</label>
+                <input type="file" id="bill-file-input" accept="image/*,application/pdf" onchange="handleBillUpload(event)" class="w-full text-xs file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs cursor-pointer" style="color:var(--muted)"/>
+                <p id="ocr-status" class="text-[10px] font-mono" style="color:var(--muted)">Upload a bill or invoice to auto-extract units.</p>
+              </div>
+
+              <!-- COMMUTER CONTROLS -->
+              <div id="person-inputs" class="space-y-4">
                 <div>
-                  <label class="block text-xs font-semibold text-rose-400 mb-1">Industrial Boiler Coal Consumed (Tons)</label>
-                  <input type="number" id="input-coal" step="0.1" min="0" placeholder="e.g. 2.5" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white"/>
-                  <small class="text-[10px] text-slate-400 font-mono">1 Ton Coal = 2,420 kg CO2</small>
+                  <label class="block text-[10px] uppercase tracking-wider mb-1.5 font-mono" style="color:var(--muted)">How did you get around?</label>
+                  <select id="person-transport-mode" onchange="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs">
+                    <option value="bus">Public bus (+0.089 kg/km)</option>
+                    <option value="gas_car">Gasoline car (+0.210 kg/km)</option>
+                    <option value="diesel_car">Diesel car (+0.170 kg/km)</option>
+                    <option value="motorcycle">Motorcycle (+0.103 kg/km)</option>
+                    <option value="train">Electric metro / rail (+0.035 kg/km)</option>
+                    <option value="ev">Electric vehicle (+0.053 kg/km)</option>
+                    <option value="walk">Bicycle / on foot (saves 0.210 kg/km)</option>
+                  </select>
+
+                  <div class="mt-3 p-4 rounded-2xl border space-y-3" style="background:rgba(255,255,255,.025); border-color:var(--line)">
+                    <div class="flex justify-between text-xs">
+                      <span style="color:var(--muted)">Distance</span>
+                      <span class="text-matrixNeon font-mono"><span id="val-person-dist">0</span> km</span>
+                    </div>
+                    <input type="range" id="input-person-dist" min="0" max="150" value="0" step="1" oninput="document.getElementById('val-person-dist').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
+
+                    <button type="button" id="gps-track-btn" onclick="toggleGpsTracking()" class="w-full text-xs py-3 rounded-xl transition flex items-center justify-center space-x-2 text-matrixNeon" style="background:rgba(47,174,125,.12); border:1px solid rgba(47,174,125,.28)">
+                      <span>Track this trip with GPS</span>
+                    </button>
+                  </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label class="block text-xs font-semibold text-amber-400 mb-1">Hazardous Waste (kg)</label>
-                    <input type="number" id="input-haz-waste" step="1" min="0" placeholder="e.g. 50" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white"/>
-                    <small class="text-[10px] text-slate-400 font-mono">+2.5 kg CO2 / kg</small>
+                <div class="space-y-3">
+                  <div class="p-4 rounded-2xl border space-y-2" style="background:rgba(255,255,255,.025); border-color:var(--line)">
+                    <div class="flex justify-between text-xs">
+                      <span style="color:var(--muted)">Grid power used</span>
+                      <span class="font-mono" style="color:var(--brick)"><span id="val-elec">0</span> kWh</span>
+                    </div>
+                    <input type="range" id="input-elec" min="0" max="5000" value="0" step="1" oninput="document.getElementById('val-elec').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
                   </div>
 
+                  <div class="p-4 rounded-2xl border space-y-2" style="background:rgba(255,255,255,.025); border-color:var(--line)">
+                    <div class="flex justify-between text-xs">
+                      <span style="color:var(--muted)">Solar generated</span>
+                      <span class="text-matrixNeon font-mono"><span id="val-solar">0</span> kWh</span>
+                    </div>
+                    <input type="range" id="input-solar" min="0" max="40" value="0" step="1" oninput="document.getElementById('val-solar').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
+                  </div>
+
+                  <div class="p-4 rounded-2xl border space-y-3" style="background:rgba(255,255,255,.025); border-color:var(--line)">
+                    <div class="flex items-center justify-between">
+                      <label class="text-xs" style="color:var(--gold)">Household size</label>
+                      <div class="flex items-center space-x-2">
+                        <button type="button" onclick="adjustHouseholdSize(-1)" class="w-7 h-7 rounded-xl border flex items-center justify-center" style="background:rgba(255,255,255,.04); border-color:var(--line); color:var(--text)">-</button>
+                        <span id="display-household-size" class="text-xs font-mono w-4 text-center" style="color:var(--gold)">1</span>
+                        <button type="button" onclick="adjustHouseholdSize(1)" class="w-7 h-7 rounded-xl border flex items-center justify-center" style="background:rgba(255,255,255,.04); border-color:var(--line); color:var(--text)">+</button>
+                      </div>
+                    </div>
+                    <div class="space-y-2 pt-2 border-t" style="border-color:var(--line)">
+                      <div class="flex justify-between text-xs">
+                        <span style="color:var(--muted)">Household waste</span>
+                        <span class="font-mono" style="color:var(--gold)"><span id="val-waste">0</span> kg</span>
+                      </div>
+                      <input type="range" id="input-waste" min="0" max="100" value="0" step="0.5" oninput="document.getElementById('val-waste').innerText=this.value; calculateLivePreview();" class="w-full cursor-pointer"/>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
+              <!-- FACTORY CONTROLS -->
+              <div id="factory-inputs" class="hidden space-y-4">
+                <div class="p-4 rounded-2xl border space-y-3" style="background:rgba(255,255,255,.025); border-color:var(--line)">
                   <div>
-                    <label class="block text-xs font-semibold text-amber-300 mb-1">Solid Waste (kg)</label>
-                    <input type="number" id="input-solid-waste" step="1" min="0" placeholder="e.g. 200" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white"/>
-                    <small class="text-[10px] text-slate-400 font-mono">+1.5 kg CO2 / kg</small>
+                    <label class="block text-xs mb-1" style="color:var(--brick)">Boiler coal (tons)</label>
+                    <input type="number" id="input-coal" step="0.1" min="0" placeholder="e.g. 2.5" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs"/>
+                  </div>
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs mb-1" style="color:var(--gold)">Hazardous waste (kg)</label>
+                      <input type="number" id="input-haz-waste" step="1" min="0" placeholder="e.g. 50" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs"/>
+                    </div>
+                    <div>
+                      <label class="block text-xs mb-1" style="color:var(--gold)">Solid waste (kg)</label>
+                      <input type="number" id="input-solid-waste" step="1" min="0" placeholder="e.g. 200" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs"/>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <!-- Direct Offset Input -->
-            <div>
-              <label class="block text-xs font-semibold text-cyberCyan mb-1.5">Direct Offset Certificate Purchase (kg CO2)</label>
-              <input type="number" id="input-direct-offset" step="0.1" min="0" placeholder="e.g. 25.0" oninput="calculateLivePreview()" class="w-full glass-input rounded-xl px-4 py-2.5 text-xs text-white"/>
-            </div>
-
-            <div class="p-4 rounded-2xl bg-obsidian border border-white/10 text-xs space-y-2">
-              <div class="flex justify-between items-center text-slate-400">
-                <span>Est. Released: <strong id="preview-released" class="text-rose-400 font-mono font-bold">0.00</strong> kg</span>
-                <span>Est. Avoided: <strong id="preview-saved" class="text-emeraldAccent font-mono font-bold">0.00</strong> kg</span>
+              <div>
+                <label class="block text-xs mb-1.5 text-electricGreen">Buy an offset directly (kg CO2)</label>
+                <input type="number" id="input-direct-offset" step="0.1" min="0" placeholder="e.g. 25.0" oninput="calculateLivePreview()" class="w-full editorial-input rounded-2xl px-4 py-3 text-xs"/>
               </div>
-              <div class="flex justify-between items-center border-t border-white/10 pt-2">
-                <span class="text-slate-300 font-semibold">Trees Offset Required:</span>
-                <strong id="live-trees-preview" class="text-emeraldAccent font-bold">0 Trees</strong>
-              </div>
-            </div>
 
-            <button type="submit" class="w-full btn-gradient text-obsidian font-black text-xs py-3.5 rounded-xl uppercase tracking-widest">Save Daily Log</button>
-          </form>
+              <div class="p-4 rounded-2xl border text-xs space-y-2 font-mono" style="background:rgba(255,255,255,.025); border-color:var(--line)">
+                <div class="flex justify-between" style="color:var(--muted)">
+                  <span>Released: <strong style="color:var(--brick)" id="preview-released">0.00</strong> kg</span>
+                  <span>Avoided: <strong class="text-matrixNeon" id="preview-saved">0.00</strong> kg</span>
+                </div>
+                <div class="flex justify-between border-t pt-2" style="border-color:var(--line)">
+                  <span style="color:var(--text)">Trees required:</span>
+                  <strong id="live-trees-preview" class="text-matrixNeon">0 Trees</strong>
+                </div>
+              </div>
+
+              <button type="submit" class="w-full btn-editorial text-xs py-4 rounded-2xl uppercase tracking-widest">Add to ledger</button>
+            </form>
+          </div>
         </div>
 
-        <!-- Analytics & Tables -->
-        <div class="lg:col-span-7 space-y-6">
+        <!-- ============ LEDGER PANEL ============ -->
+        <div id="panel-ledger" class="dash-panel hidden space-y-6">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <div class="neo-glass-card p-5 rounded-3xl">
-              <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 font-display">Emissions vs Offsets</h3>
+            <div class="editorial-card p-6 rounded-[20px]">
+              <h3 class="text-xs uppercase tracking-wider mb-4">Released vs avoided</h3>
               <div class="h-48"><canvas id="categoryChart"></canvas></div>
             </div>
-            
-            <div class="neo-glass-card p-5 rounded-3xl">
-              <h3 class="text-xs font-bold text-white uppercase tracking-wider mb-3 font-display">Emissions Breakdown</h3>
+            <div class="editorial-card p-6 rounded-[20px]">
+              <h3 class="text-xs uppercase tracking-wider mb-4">Where it comes from</h3>
               <div class="h-48"><canvas id="donutChart"></canvas></div>
             </div>
           </div>
 
-          <!-- Leaderboard Table -->
-          <div class="neo-glass-card p-6 rounded-3xl">
-            <h3 class="text-sm font-bold text-white mb-4 font-display">🏆 Community Leaderboard</h3>
+          <div class="editorial-card p-6 sm:p-8 rounded-[20px]">
+            <h3 class="text-sm mb-4 uppercase tracking-wider">Activity ledger</h3>
             <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-300">
-                <thead class="bg-obsidian/80 text-slate-400 uppercase text-[9px] font-mono tracking-widest">
-                  <tr>
-                    <th class="p-3">Rank</th>
-                    <th class="p-3">User</th>
-                    <th class="p-3">Account Type</th>
-                    <th class="p-3">Avoided</th>
-                    <th class="p-3 text-right">Credits Earned</th>
-                  </tr>
+              <table class="w-full text-left text-xs">
+                <thead class="uppercase text-[9px] font-mono tracking-widest" style="color:var(--muted)">
+                  <tr><th class="p-3.5">Date</th><th class="p-3.5">Activity</th><th class="p-3.5">Released</th><th class="p-3.5">Avoided</th><th class="p-3.5">Trees</th><th class="p-3.5 text-right">Action</th></tr>
                 </thead>
-                <tbody id="leaderboard-body" class="divide-y divide-white/5 font-mono"></tbody>
+                <tbody id="logs-table-body" class="divide-y font-mono" style="border-color:var(--line)"></tbody>
               </table>
             </div>
           </div>
-
-          <!-- Historical Log Table -->
-          <div class="neo-glass-card p-6 rounded-3xl">
-            <h3 class="text-sm font-bold text-white mb-4 font-display">Historical Activity Log</h3>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-300">
-                <thead class="bg-obsidian/80 text-slate-400 uppercase text-[9px] font-mono tracking-widest">
-                  <tr>
-                    <th class="p-3">Date</th>
-                    <th class="p-3">Mode</th>
-                    <th class="p-3">Released</th>
-                    <th class="p-3">Avoided</th>
-                    <th class="p-3">Trees Needed</th>
-                    <th class="p-3 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody id="logs-table-body" class="divide-y divide-white/5 font-mono"></tbody>
-              </table>
-            </div>
-          </div>
-
         </div>
 
-      </section>
-    </main>
+        <!-- ============ LEADERBOARD PANEL ============ -->
+        <div id="panel-leaderboard" class="dash-panel hidden">
+          <div class="editorial-card p-6 sm:p-8 rounded-[20px]">
+            <h3 class="text-sm mb-4 uppercase tracking-wider">Community leaderboard</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="uppercase text-[9px] font-mono tracking-widest" style="color:var(--muted)">
+                  <tr><th class="p-3.5">Rank</th><th class="p-3.5">Account</th><th class="p-3.5">Type</th><th class="p-3.5">Avoided</th><th class="p-3.5 text-right">Credits</th></tr>
+                </thead>
+                <tbody id="leaderboard-body" class="divide-y font-mono" style="border-color:var(--line)"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ REPORTS PANEL ============ -->
+        <div id="panel-reports" class="dash-panel hidden">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            <div class="editorial-card p-6 rounded-[20px] flex flex-col justify-between">
+              <div>
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:rgba(47,174,125,.14)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="#34d399" stroke-width="1.7"/><path d="M8 9h8M8 13h8M8 17h4" stroke="#34d399" stroke-width="1.6" stroke-linecap="round"/></svg>
+                </div>
+                <h4 class="text-sm mb-1">Export CSV</h4>
+                <p class="text-xs" style="color:var(--muted)">Every logged entry, raw, for your own spreadsheet or accounting tools.</p>
+              </div>
+              <button onclick="downloadCSV()" class="mt-5 w-full btn-editorial text-xs py-3 rounded-xl uppercase tracking-widest">Download CSV</button>
+            </div>
+
+            <div class="editorial-card p-6 rounded-[20px] flex flex-col justify-between" style="border-color:rgba(217,196,143,.35)">
+              <div>
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:rgba(217,196,143,.14)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="9" r="6" stroke="#d9c48f" stroke-width="1.7"/><path d="M8.5 14.5L7 21l5-2.5L17 21l-1.5-6.5" stroke="#d9c48f" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                </div>
+                <h4 class="text-sm mb-1">Certificate</h4>
+                <p class="text-xs" style="color:var(--muted)">A shareable statement of your total offsets and credits earned to date.</p>
+              </div>
+              <button onclick="downloadPDF()" class="mt-5 w-full btn-editorial text-xs py-3 rounded-xl uppercase tracking-widest" style="background:linear-gradient(135deg,var(--gold),#8a6f37)">Download PDF</button>
+            </div>
+
+            <div class="editorial-card p-6 rounded-[20px] flex flex-col justify-between">
+              <div>
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center mb-4" style="background:rgba(47,174,125,.14)">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 19V9l5-5 5 5v10M14 19v-6l4-4 2 2v8" stroke="#34d399" stroke-width="1.6" stroke-linejoin="round"/></svg>
+                </div>
+                <h4 class="text-sm mb-1">Monthly report</h4>
+                <p class="text-xs" style="color:var(--muted)">A full breakdown of this month's activity against your cap.</p>
+              </div>
+              <button onclick="downloadMonthlyPDF()" class="mt-5 w-full btn-editorial text-xs py-3 rounded-xl uppercase tracking-widest">Download report</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ============ PROFILE PANEL ============ -->
+        <div id="panel-profile" class="dash-panel hidden max-w-3xl space-y-6">
+          <div class="editorial-card p-8 sm:p-10 rounded-[24px] relative overflow-hidden">
+            <div class="absolute -right-16 -top-20 h-56 w-56 rounded-full blur-3xl pointer-events-none" style="background:rgba(217,196,143,.12)"></div>
+            <div class="relative flex flex-col sm:flex-row items-center sm:items-start gap-6">
+              <div class="relative group flex-shrink-0">
+                <div class="w-28 h-28 rounded-full overflow-hidden flex items-center justify-center text-3xl" style="background:linear-gradient(135deg,var(--green-500),var(--gold)); box-shadow:0 0 0 4px rgba(217,196,143,.15), 0 20px 44px -12px rgba(0,0,0,.7);">
+                  <img id="profile-avatar-img" class="avatar-img hidden w-full h-full object-cover" src="" alt="" />
+                  <span id="profile-avatar-fallback" class="avatar-fallback text-white">U</span>
+                </div>
+                <label for="avatar-file-input" class="absolute inset-0 rounded-full flex items-center justify-center text-center px-2 text-[9px] uppercase tracking-widest text-white opacity-0 group-hover:opacity-100 cursor-pointer transition" style="background:rgba(4,10,8,.68);">
+                  Change photo
+                </label>
+                <input type="file" id="avatar-file-input" accept="image/*" onchange="handleAvatarUpload(event)" class="hidden"/>
+              </div>
+              <div class="flex-1 text-center sm:text-left">
+                <div class="premium-pill inline-flex items-center gap-2 rounded-full px-3 py-1 text-[9px] uppercase tracking-[.2em] font-mono mb-2" style="border:1px solid rgba(217,196,143,.3); background:rgba(217,196,143,.08); color:#eddcae;">
+                  <span>✦</span> Premium member
+                </div>
+                <h2 id="profile-display-name" class="text-2xl text-white">—</h2>
+                <p id="profile-email-display" class="text-xs mt-1" style="color:var(--muted)">—</p>
+                <p id="profile-member-since" class="text-[10px] font-mono uppercase tracking-widest mt-2" style="color:var(--muted)">Member since —</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div class="editorial-card p-5 rounded-[18px] text-center">
+              <p class="text-[9px] font-mono uppercase tracking-widest" style="color:var(--muted)">Lifetime avoided</p>
+              <p id="profile-stat-saved" class="text-2xl text-matrixNeon mt-2">0.00 kg</p>
+            </div>
+            <div class="editorial-card p-5 rounded-[18px] text-center">
+              <p class="text-[9px] font-mono uppercase tracking-widest" style="color:var(--muted)">Net credits</p>
+              <p id="profile-stat-credits" class="text-2xl text-electricGreen mt-2">0.00000</p>
+            </div>
+            <div class="editorial-card p-5 rounded-[18px] text-center">
+              <p class="text-[9px] font-mono uppercase tracking-widest" style="color:var(--muted)">Entries logged</p>
+              <p id="profile-stat-entries" class="text-2xl text-white mt-2">0</p>
+            </div>
+          </div>
+
+          <div class="editorial-card p-6 sm:p-8 rounded-[20px]">
+            <h3 class="text-sm uppercase tracking-wider mb-5">Edit profile</h3>
+            <form id="profile-form" onsubmit="handleProfileSave(event)" class="space-y-4 max-w-lg">
+              <div>
+                <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">Display name</label>
+                <input type="text" id="profile-name-input" class="w-full editorial-input rounded-2xl px-4 py-3 text-sm"/>
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">Email</label>
+                <input type="email" id="profile-email-input" disabled class="w-full editorial-input rounded-2xl px-4 py-3 text-sm opacity-60 cursor-not-allowed"/>
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">About / location</label>
+                <textarea id="profile-bio-input" rows="3" placeholder="Where you're offsetting from…" class="w-full editorial-input rounded-2xl px-4 py-3 text-sm resize-none"></textarea>
+              </div>
+              <div>
+                <label class="block text-[10px] uppercase tracking-widest mb-1.5 font-mono" style="color:var(--muted)">Account type</label>
+                <input type="text" id="profile-type-input" disabled class="w-full editorial-input rounded-2xl px-4 py-3 text-sm opacity-60 cursor-not-allowed capitalize"/>
+              </div>
+              <button type="submit" class="btn-editorial text-xs px-6 py-3.5 rounded-2xl uppercase tracking-widest">Save changes</button>
+            </form>
+          </div>
+        </div>
+
+      </main>
+    </div>
   </div>
 
   <script>
     const TRANSPORT_FACTORS = { bus: 0.089, gas_car: 0.210, diesel_car: 0.170, motorcycle: 0.103, train: 0.035, ev: 0.053, walk: 0.000 };
     let currentUser = null, token = null, barChartInstance = null, donutChartInstance = null;
-    let monthlyBudgetCap = 100;
+    let monthlyBudgetCap = 100, watchId = null, tripCoordinates = [], totalTripKm = 0, currentHouseholdSize = 1;
+
+    const PANEL_META = {
+      overview: ['Overview', 'Your carbon position at a glance'],
+      log: ['Log activity', 'Add a new entry to your ledger'],
+      ledger: ['Ledger', 'Every entry you have logged'],
+      leaderboard: ['Leaderboard', 'How your account compares'],
+      reports: ['Reports', 'Export certificates and statements'],
+      profile: ['Profile', 'Manage your account and photo']
+    };
+
+    function switchPanel(name) {
+      Object.keys(PANEL_META).forEach(k => {
+        document.getElementById(`panel-${k}`).classList.toggle('hidden', k !== name);
+        document.getElementById(`nav-${k}`).classList.toggle('active', k === name);
+      });
+      document.getElementById('panel-title').innerText = PANEL_META[name][0];
+      document.getElementById('panel-subtitle').innerText = PANEL_META[name][1];
+    }
 
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      const bgColor = type === 'success' ? 'bg-obsidian border-emeraldAccent/50 text-emeraldAccent' : 'bg-obsidian border-rose-500/50 text-rose-300';
-      toast.className = `pointer-events-auto border backdrop-blur-xl ${bgColor} text-xs font-bold px-4 py-3 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-3 opacity-0 flex items-center space-x-2`;
-      toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚠️'}</span> <span>${message}</span>`;
+      const bgColor = type === 'success' ? 'bg-trueBlack border-matrixNeon/40 text-matrixNeon' : 'bg-trueBlack border-rose-400/40 text-rose-300';
+      toast.className = `pointer-events-auto border backdrop-blur-xl ${bgColor} text-xs px-5 py-4 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-3 opacity-0 flex items-center space-x-3`;
+      toast.innerHTML = `<span class="text-base">${type === 'success' ? '◆' : '⚠️'}</span> <span class="tracking-wide">${message}</span>`;
       container.appendChild(toast);
       setTimeout(() => toast.classList.remove('translate-y-3', 'opacity-0'), 50);
       setTimeout(() => { toast.classList.add('opacity-0'); setTimeout(() => toast.remove(), 300); }, 3500);
+    }
+
+    /* ===== ambient living background: drifting carbon motes ===== */
+    (function initAmbientScene() {
+      const canvas = document.getElementById('ambient-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let w, h, particles = [];
+
+      function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+      resize();
+      window.addEventListener('resize', resize);
+
+      function rand(a, b) { return a + Math.random() * (b - a); }
+      const COUNT = window.innerWidth < 640 ? 26 : 46;
+      for (let i = 0; i < COUNT; i++) {
+        particles.push({
+          x: rand(0, w), y: rand(0, h),
+          r: rand(0.6, 2.2),
+          speed: rand(0.06, 0.30),
+          drift: rand(-0.4, 0.4),
+          phase: rand(0, Math.PI * 2),
+          gold: Math.random() < 0.22,
+          alpha: rand(0.18, 0.55)
+        });
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, w, h);
+        particles.forEach(p => {
+          p.y -= p.speed;
+          p.phase += 0.012;
+          p.x += Math.sin(p.phase) * p.drift * 0.25;
+          if (p.y < -12) { p.y = h + 12; p.x = rand(0, w); }
+          if (p.x < -12) p.x = w + 12;
+          if (p.x > w + 12) p.x = -12;
+
+          const color = p.gold ? `rgba(217,196,143,${p.alpha})` : `rgba(79,211,155,${p.alpha})`;
+          const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 7);
+          glow.addColorStop(0, color);
+          glow.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = glow;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r * 7, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = p.gold ? `rgba(238,220,174,${Math.min(p.alpha + .25, .9)})` : `rgba(120,235,180,${Math.min(p.alpha + .25, .9)})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fill();
+        });
+        if (!reduceMotion) requestAnimationFrame(draw);
+      }
+      draw();
+    })();
+
+    function toRad(value) { return value * Math.PI / 180; }
+    function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
+      const R = 6371;
+      const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+      const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    }
+
+    function toggleGpsTracking() {
+      const trackingBtn = document.getElementById('gps-track-btn');
+      if (watchId !== null) {
+        navigator.geolocation.clearWatch(watchId);
+        watchId = null;
+        trackingBtn.innerHTML = "<span>Track this trip with GPS</span>";
+        trackingBtn.className = "w-full text-xs py-3 rounded-xl transition flex items-center justify-center space-x-2 text-matrixNeon";
+        trackingBtn.style.background = "rgba(47,174,125,.12)";
+        trackingBtn.style.border = "1px solid rgba(47,174,125,.28)";
+        showToast(`Route logged: ${totalTripKm.toFixed(2)} km`, 'success');
+        return;
+      }
+      if (!('geolocation' in navigator)) { showToast('GPS is unavailable on this device.', 'error'); return; }
+      tripCoordinates = []; totalTripKm = 0;
+      trackingBtn.innerHTML = "<span>Stop &amp; save trip</span>";
+      trackingBtn.className = "w-full text-xs py-3 rounded-xl transition flex items-center justify-center space-x-2";
+      trackingBtn.style.background = "rgba(224,130,123,.14)";
+      trackingBtn.style.border = "1px solid rgba(224,130,123,.35)";
+      trackingBtn.style.color = "var(--brick)";
+      showToast('Tracking your trip…', 'success');
+
+      watchId = navigator.geolocation.watchPosition((pos) => {
+        const curLat = pos.coords.latitude, curLon = pos.coords.longitude;
+        tripCoordinates.push({ lat: curLat, lon: curLon });
+        if (tripCoordinates.length > 1) {
+          const prev = tripCoordinates[tripCoordinates.length - 2];
+          const dist = calculateHaversineDistance(prev.lat, prev.lon, curLat, curLon);
+          if (dist > 0.005) {
+            totalTripKm += dist;
+            document.getElementById('input-person-dist').value = totalTripKm.toFixed(1);
+            document.getElementById('val-person-dist').innerText = totalTripKm.toFixed(1);
+            calculateLivePreview();
+          }
+        }
+      }, (err) => showToast('GPS error: ' + err.message, 'error'), { enableHighAccuracy: true });
+    }
+
+    async function handleBillUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const statusEl = document.getElementById('ocr-status');
+      statusEl.innerText = "Scanning document…";
+      try {
+        const { data: { text } } = await Tesseract.recognize(file, 'eng');
+        const match = text.match(/(?:consumption|units|total\s*unit)[^\d]*(\d{1,5})/i);
+        let units = match ? parseFloat(match[1]) : 150;
+        document.getElementById('input-elec').value = units;
+        document.getElementById('val-elec').innerText = units;
+        statusEl.innerText = `Extracted ${units} kWh from the bill.`;
+        calculateLivePreview();
+      } catch (e) {
+        statusEl.innerText = "Couldn't read that file — try a clearer scan.";
+      }
+    }
+
+    function getInitials(name) {
+      if (!name) return 'U';
+      const parts = name.trim().split(/\s+/);
+      return parts.slice(0, 2).map(w => w[0].toUpperCase()).join('');
+    }
+
+    function applyAvatar(dataUrl) {
+      document.querySelectorAll('.avatar-img').forEach(img => { img.src = dataUrl; img.classList.remove('hidden'); });
+      document.querySelectorAll('.avatar-fallback').forEach(el => el.classList.add('hidden'));
+    }
+
+    function applyAvatarFallback(initials) {
+      document.querySelectorAll('.avatar-fallback').forEach(el => { el.innerText = initials; el.classList.remove('hidden'); });
+      document.querySelectorAll('.avatar-img').forEach(img => img.classList.add('hidden'));
+    }
+
+    function handleAvatarUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) { showToast('Please choose an image file.', 'error'); return; }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const dataUrl = e.target.result;
+        localStorage.setItem('ecomatrix_avatar', dataUrl);
+        applyAvatar(dataUrl);
+        showToast('Profile photo updated.', 'success');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function refreshProfileIdentity() {
+      const initials = getInitials(currentUser.username);
+      const savedAvatar = localStorage.getItem('ecomatrix_avatar');
+      if (savedAvatar) applyAvatar(savedAvatar); else applyAvatarFallback(initials);
+
+      document.getElementById('sidebar-username').innerText = currentUser.username || 'Account';
+      document.getElementById('sidebar-account-type').innerText = currentUser.accountType === 'factory' ? 'Facility' : 'Individual';
+
+      document.getElementById('profile-display-name').innerText = currentUser.username || 'Account';
+      document.getElementById('profile-email-display').innerText = currentUser.email || '—';
+      const since = currentUser.createdAt ? new Date(currentUser.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : 'this workspace launch';
+      document.getElementById('profile-member-since').innerText = `Member since ${since}`;
+
+      document.getElementById('profile-name-input').value = currentUser.username || '';
+      document.getElementById('profile-email-input').value = currentUser.email || '';
+      document.getElementById('profile-bio-input').value = currentUser.bio || '';
+      document.getElementById('profile-type-input').value = currentUser.accountType === 'factory' ? 'Facility' : 'Individual';
+    }
+
+    function handleProfileSave(e) {
+      e.preventDefault();
+      currentUser.username = document.getElementById('profile-name-input').value.trim() || currentUser.username;
+      currentUser.bio = document.getElementById('profile-bio-input').value.trim();
+      localStorage.setItem('user_data', JSON.stringify(currentUser));
+      refreshProfileIdentity();
+      showToast('Profile updated.', 'success');
     }
 
     window.addEventListener('DOMContentLoaded', () => {
@@ -464,123 +998,106 @@
       if (token && currentUser) setupDashboard(); else navigateTo('signin');
     });
 
-    function navigateTo(viewName) {
-      document.getElementById('signin-view').classList.add('hidden');
-      document.getElementById('signup-view').classList.add('hidden');
-      document.getElementById('dashboard-view').classList.add('hidden');
-      document.getElementById(`${viewName}-view`).classList.remove('hidden');
+    function navigateTo(v) {
+      ['signin-view', 'signup-view', 'dashboard-view'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      const el = document.getElementById(`${v}-view`);
+      if (el) el.classList.remove('hidden'); else document.getElementById('dashboard-view').classList.remove('hidden');
     }
 
     async function handleSignUp(e) {
       e.preventDefault();
-      const username = document.getElementById('signup-username').value;
-      const email = document.getElementById('signup-email').value;
-      const password = document.getElementById('signup-password').value;
-      const accountType = document.getElementById('signup-type').value;
-
       const res = await fetch('/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password, accountType })
+        body: JSON.stringify({
+          username: document.getElementById('signup-username').value,
+          email: document.getElementById('signup-email').value,
+          password: document.getElementById('signup-password').value,
+          accountType: document.getElementById('signup-type').value
+        })
       });
       const data = await res.json();
-      if (!res.ok) showToast(data.error, 'error');
-      else { showToast(data.message, 'success'); setTimeout(() => navigateTo('signin'), 1500); }
+      if (!res.ok) showToast(data.error, 'error'); else { showToast(data.message, 'success'); navigateTo('signin'); }
     }
 
     async function handleSignIn(e) {
       e.preventDefault();
-      const identifier = document.getElementById('signin-identifier').value;
-      const password = document.getElementById('signin-password').value;
-
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ identifier, password })
+        body: JSON.stringify({ identifier: document.getElementById('signin-identifier').value, password: document.getElementById('signin-password').value })
       });
       const data = await res.json();
-      if (!res.ok) showToast(data.error, 'error');
-      else {
+      if (!res.ok) showToast(data.error, 'error'); else {
         token = data.token; currentUser = data.user;
         localStorage.setItem('jwt_token', token);
         localStorage.setItem('user_data', JSON.stringify(currentUser));
-        showToast('Welcome back, ' + currentUser.username + '!', 'success');
         setupDashboard();
       }
     }
 
-    function handleLogout() {
-      localStorage.clear(); token = null; currentUser = null;
-      showToast('Signed out successfully.', 'success');
-      navigateTo('signin');
-    }
+    function handleLogout() { localStorage.clear(); navigateTo('signin'); }
 
     function setupDashboard() {
       const isFactory = currentUser.accountType === 'factory';
-      
-      document.getElementById('account-type-badge').innerText = isFactory ? 'Industrial Mode' : 'Commuter Mode';
-
       if (isFactory) {
         document.getElementById('person-inputs').classList.add('hidden');
         document.getElementById('factory-inputs').classList.remove('hidden');
-        document.getElementById('form-title').innerText = '🏭 Industrial Facility Logger';
+        document.getElementById('form-title').innerText = 'Log a facility reading';
       } else {
         document.getElementById('person-inputs').classList.remove('hidden');
         document.getElementById('factory-inputs').classList.add('hidden');
-        document.getElementById('form-title').innerText = '⚡ Daily Activity Logger';
+        document.getElementById('form-title').innerText = 'Log an activity';
+        currentHouseholdSize = currentUser.householdSize || 1;
+        document.getElementById('display-household-size').innerText = currentHouseholdSize;
+        updateWasteBasedOnHousehold();
       }
-
+      refreshProfileIdentity();
       navigateTo('dashboard');
+      switchPanel('overview');
       loadLogsFromDatabase();
       loadLeaderboard();
       loadSustainabilityAdvisor();
+      calculateLivePreview();
+    }
+
+    function adjustHouseholdSize(change) {
+      currentHouseholdSize = Math.max(1, Math.min(20, currentHouseholdSize + change));
+      document.getElementById('display-household-size').innerText = currentHouseholdSize;
+      updateWasteBasedOnHousehold();
+      calculateLivePreview();
+    }
+
+    function updateWasteBasedOnHousehold() {
+      const autoWaste = currentHouseholdSize * 0.75 * 7;
+      document.getElementById('input-waste').value = autoWaste.toFixed(1);
+      document.getElementById('val-waste').innerText = autoWaste.toFixed(1);
     }
 
     async function loadSustainabilityAdvisor() {
-      const responseBox = document.getElementById('advisor-response-box');
-      try {
-        const res = await fetch('/api/sustainability-advisor', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const data = await res.json();
-        if (res.ok) {
-          responseBox.innerText = data.advice;
-        } else {
-          responseBox.innerText = '⚠️ Personal strategy currently unavailable.';
-        }
-      } catch (err) {
-        responseBox.innerText = '⚠️ Error loading advisor guidance.';
-      }
+      const res = await fetch('/api/sustainability-advisor', { headers: { 'Authorization': `Bearer ${token}` } });
+      const data = await res.json();
+      if (res.ok) document.getElementById('advisor-response-box').innerText = data.advice;
     }
 
-    function updateMonthlyBudgetCap(val) {
-      monthlyBudgetCap = parseFloat(val) || 100;
-      loadLogsFromDatabase();
-    }
+    function updateMonthlyBudgetCap(val) { monthlyBudgetCap = parseFloat(val) || 100; loadLogsFromDatabase(); }
 
     function calculateLivePreview() {
       let released = 0, saved = 0;
-
       if (currentUser.accountType === 'factory') {
-        const coal = parseFloat(document.getElementById('input-coal').value) || 0;
-        const haz = parseFloat(document.getElementById('input-haz-waste').value) || 0;
-        const solid = parseFloat(document.getElementById('input-solid-waste').value) || 0;
-
-        released += (coal * 2420) + (haz * 2.5) + (solid * 1.5);
+        released += ((parseFloat(document.getElementById('input-coal').value) || 0) * 2420) +
+                    ((parseFloat(document.getElementById('input-haz-waste').value) || 0) * 2.5) +
+                    ((parseFloat(document.getElementById('input-solid-waste').value) || 0) * 1.5);
       } else {
         const mode = document.getElementById('person-transport-mode').value;
         const dist = parseFloat(document.getElementById('input-person-dist').value) || 0;
         const elec = parseFloat(document.getElementById('input-elec').value) || 0;
         const solar = parseFloat(document.getElementById('input-solar').value) || 0;
         const waste = parseFloat(document.getElementById('input-waste').value) || 0;
-
         released += (dist * TRANSPORT_FACTORS[mode]) + (elec * 0.82) + (waste * 1.9);
         saved += (mode === 'walk' ? dist * 0.210 : 0) + (solar * 0.82);
       }
-
-      const directOffset = parseFloat(document.getElementById('input-direct-offset').value) || 0;
-      saved += directOffset;
-
+      saved += parseFloat(document.getElementById('input-direct-offset').value) || 0;
       document.getElementById('preview-released').innerText = released.toFixed(2);
       document.getElementById('preview-saved').innerText = saved.toFixed(2);
       document.getElementById('live-trees-preview').innerText = `${Math.ceil(released / 21.77)} Trees`;
@@ -590,19 +1107,12 @@
     async function handleActivitySubmit(e) {
       e.preventDefault();
       const { released, saved } = calculateLivePreview();
-
-      const payload = {
-        accountType: currentUser.accountType,
-        releasedKg: released,
-        savedKg: saved,
-        offsetKg: parseFloat(document.getElementById('input-direct-offset').value) || 0
-      };
-
+      const payload = { accountType: currentUser.accountType, releasedKg: released, savedKg: saved, offsetKg: parseFloat(document.getElementById('input-direct-offset').value) || 0 };
       if (currentUser.accountType === 'factory') {
         payload.coalTons = parseFloat(document.getElementById('input-coal').value) || 0;
         payload.hazardousWasteKg = parseFloat(document.getElementById('input-haz-waste').value) || 0;
         payload.solidWasteKg = parseFloat(document.getElementById('input-solid-waste').value) || 0;
-        payload.transportMode = 'Industrial Plant';
+        payload.transportMode = 'Industrial Studio';
       } else {
         payload.transportMode = document.getElementById('person-transport-mode').value;
         payload.transportDistance = parseFloat(document.getElementById('input-person-dist').value) || 0;
@@ -610,69 +1120,37 @@
         payload.solarPowerKwh = parseFloat(document.getElementById('input-solar').value) || 0;
         payload.wasteKg = parseFloat(document.getElementById('input-waste').value) || 0;
       }
+      const res = await fetch('/api/logs', { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify(payload) });
+      if (res.ok) { showToast('Added to your ledger.', 'success'); loadLogsFromDatabase(); loadLeaderboard(); loadSustainabilityAdvisor(); }
+    }
 
-      const res = await fetch('/api/logs', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-        body: JSON.stringify(payload)
-      });
-
-      if (res.ok) {
-        showToast('Activity log saved!', 'success');
-        document.getElementById('activity-form').reset();
-        if (currentUser.accountType === 'person') {
-          document.getElementById('val-person-dist').innerText = '0';
-          document.getElementById('val-elec').innerText = '0';
-          document.getElementById('val-solar').innerText = '0';
-          document.getElementById('val-waste').innerText = '0';
-        }
-        calculateLivePreview();
-        loadLogsFromDatabase();
-        loadLeaderboard();
-        loadSustainabilityAdvisor();
-      } else {
-        showToast('Failed to save activity.', 'error');
+    function updateGauge(released, saved) {
+      const total = released + saved;
+      const ratio = total > 0 ? saved / total : 0.5;
+      const angle = -90 + ratio * 180;
+      const needle = document.getElementById('gauge-needle-group');
+      if (needle) needle.setAttribute('transform', `rotate(${angle})`);
+      const net = saved - released;
+      const el = document.getElementById('gauge-net-value');
+      if (el) {
+        el.innerText = `${net >= 0 ? '+' : ''}${net.toFixed(1)} kg`;
+        el.style.color = net >= 0 ? '#9fe0c2' : '#e2a39e';
       }
     }
 
     async function loadLogsFromDatabase() {
       const res = await fetch('/api/logs', { headers: { 'Authorization': `Bearer ${token}` } });
       const logs = await res.json();
-
-      let totalReleased = 0, totalSaved = 0, totalCredits = 0;
-      let totalTransportCO2 = 0, totalPowerCO2 = 0, totalWasteCO2 = 0;
-      let totalCoalCO2 = 0, totalHazCO2 = 0, totalSolidCO2 = 0;
-
+      let totalReleased = 0, totalSaved = 0, totalCredits = 0, tCO2 = 0, pCO2 = 0, wCO2 = 0, cCO2 = 0, hCO2 = 0, sCO2 = 0;
       const tableBody = document.getElementById('logs-table-body');
       tableBody.innerHTML = '';
 
       logs.forEach(log => {
-        totalReleased += log.releasedKg;
-        totalSaved += log.savedKg;
-        totalCredits += log.creditsEarned;
+        totalReleased += log.releasedKg; totalSaved += log.savedKg; totalCredits += log.creditsEarned;
+        if (log.accountType === 'factory') { cCO2 += (log.coalTons || 0) * 2420; hCO2 += (log.hazardousWasteKg || 0) * 2.5; sCO2 += (log.solidWasteKg || 0) * 1.5; }
+        else { tCO2 += (log.transportDistance || 0) * (TRANSPORT_FACTORS[log.transportMode] || 0); pCO2 += (log.gridPowerKwh || 0) * 0.82; wCO2 += (log.wasteKg || 0) * 1.9; }
 
-        if (log.accountType === 'factory') {
-          totalCoalCO2 += (log.coalTons || 0) * 2420;
-          totalHazCO2 += (log.hazardousWasteKg || 0) * 2.5;
-          totalSolidCO2 += (log.solidWasteKg || 0) * 1.5;
-        } else {
-          totalTransportCO2 += ((log.transportDistance || 0) * (TRANSPORT_FACTORS[log.transportMode] || 0));
-          totalPowerCO2 += ((log.gridPowerKwh || 0) * 0.82);
-          totalWasteCO2 += ((log.wasteKg || 0) * 1.9);
-        }
-
-        const modeDisplay = log.accountType === 'factory' ? `Coal (${log.coalTons}T), Haz (${log.hazardousWasteKg || 0}kg)` : log.transportMode;
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class="p-3 text-[11px] text-slate-400">${new Date(log.date).toLocaleDateString()}</td>
-          <td class="p-3 text-emeraldAccent capitalize font-medium">${modeDisplay}</td>
-          <td class="p-3 text-rose-400 font-semibold">${log.releasedKg} kg</td>
-          <td class="p-3 text-emeraldAccent font-semibold">${log.savedKg} kg</td>
-          <td class="p-3 text-emeraldAccent font-bold">${log.treesNeeded} Trees 🌲</td>
-          <td class="p-3 text-right"><button onclick="deleteLog('${log._id}')" class="text-slate-500 hover:text-rose-400 transition">Delete</button></td>
-        `;
-        tableBody.appendChild(row);
+        tableBody.innerHTML += `<tr><td class="p-3" style="color:var(--muted)">${new Date(log.date).toLocaleDateString()}</td><td class="p-3 text-matrixNeon capitalize">${log.transportMode}</td><td class="p-3" style="color:var(--brick)">${log.releasedKg} kg</td><td class="p-3 text-matrixNeon">${log.savedKg} kg</td><td class="p-3 text-electricGreen">${log.treesNeeded}</td><td class="p-3 text-right"><button onclick="deleteLog('${log._id}')" class="hover:underline" style="color:var(--brick)">Remove</button></td></tr>`;
       });
 
       document.getElementById('stat-released').innerText = totalReleased.toFixed(2);
@@ -680,119 +1158,47 @@
       document.getElementById('stat-credits').innerText = totalCredits.toFixed(5);
       document.getElementById('stat-trees-needed').innerText = Math.ceil(totalReleased / 21.77);
 
-      const budgetPercent = Math.min((totalReleased / monthlyBudgetCap) * 100, 100);
-      const budgetBar = document.getElementById('budget-bar');
-      budgetBar.style.width = `${budgetPercent}%`;
-      document.getElementById('budget-status').innerText = `${budgetPercent.toFixed(0)}% Utilized (${totalReleased.toFixed(1)} / ${monthlyBudgetCap} kg)`;
+      document.getElementById('profile-stat-saved').innerText = `${totalSaved.toFixed(2)} kg`;
+      document.getElementById('profile-stat-credits').innerText = totalCredits.toFixed(5);
+      document.getElementById('profile-stat-entries').innerText = logs.length;
+
+      const pct = Math.min((totalReleased / monthlyBudgetCap) * 100, 100);
+      document.getElementById('budget-bar').style.width = `${pct}%`;
+      document.getElementById('budget-status').innerText = `${pct.toFixed(0)}% used`;
 
       renderBadges(totalSaved, totalCredits, Math.ceil(totalReleased / 21.77), logs.length);
-      renderCharts(totalReleased, totalSaved, totalTransportCO2, totalPowerCO2, totalWasteCO2, totalCoalCO2, totalHazCO2, totalSolidCO2);
+      renderCharts(totalReleased, totalSaved, tCO2, pCO2, wCO2, cCO2, hCO2, sCO2);
+      updateGauge(totalReleased, totalSaved);
     }
 
-    function renderBadges(totalSaved, totalCredits, treesNeeded, logCount) {
-      const badges = [
-        { title: 'First Footprint', icon: '🌱', active: logCount > 0, desc: 'Logged 1st entry' },
-        { title: 'Clean Commuter', icon: '🚲', active: totalSaved > 10, desc: 'Avoided >10kg CO2' },
-        { title: 'Carbon Neutral', icon: '⚡', active: totalCredits > 0, desc: 'Earned credits' },
-        { title: 'Forest Hero', icon: '🌲', active: treesNeeded >= 5, desc: 'Offset 5+ trees' }
-      ];
-
-      const container = document.getElementById('badges-container');
-      container.innerHTML = '';
-      badges.forEach(b => {
-        const badgeEl = document.createElement('div');
-        badgeEl.className = `p-4 rounded-2xl border text-center transition-all ${b.active ? 'bg-emeraldAccent/10 border-emeraldAccent/30 text-emeraldAccent shadow-lg shadow-emeraldAccent/10' : 'bg-obsidian/60 border-white/10 opacity-40 text-slate-500'}`;
-        badgeEl.innerHTML = `<div class="text-2xl">${b.icon}</div><div class="text-xs font-bold mt-1 font-display">${b.title}</div><div class="text-[10px] text-slate-400 mt-0.5">${b.desc}</div>`;
-        container.appendChild(badgeEl);
-      });
+    function renderBadges(saved, credits, trees, count) {
+      const badges = [{ title: 'First entry', icon: '◆', active: count > 0 }, { title: 'Low-carbon commute', icon: '🚲', active: saved > 10 }, { title: 'Net positive', icon: '🛡️', active: credits > 0 }, { title: 'Carbon sink', icon: '🌲', active: trees >= 5 }];
+      document.getElementById('badges-container').innerHTML = badges.map(b => `<div class="p-3 rounded-2xl border text-center ${b.active ? 'text-matrixNeon' : ''}" style="${b.active ? 'background:rgba(47,174,125,.14); border-color:rgba(47,174,125,.32)' : 'opacity:.4; border-color:var(--line); color:var(--muted)'}"><div class="text-xl">${b.icon}</div><div class="text-[11px] mt-1">${b.title}</div></div>`).join('');
     }
 
-    function renderCharts(released, saved, transportCO2, powerCO2, wasteCO2, coalCO2, hazCO2, solidCO2) {
-      const ctx1 = document.getElementById('categoryChart').getContext('2d');
+    function renderCharts(rel, sav, t, p, w, c, h, s) {
+      Chart.defaults.color = '#85958c';
+      Chart.defaults.borderColor = 'rgba(244,247,243,.08)';
+
       if (barChartInstance) barChartInstance.destroy();
-      barChartInstance = new Chart(ctx1, {
-        type: 'bar',
-        data: {
-          labels: ['Released', 'Avoided'],
-          datasets: [{ data: [released, saved], backgroundColor: ['#f43f5e', '#10b981'], borderRadius: 8 }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
-      });
+      barChartInstance = new Chart(document.getElementById('categoryChart'), { type: 'bar', data: { labels: ['Released', 'Avoided'], datasets: [{ data: [rel, sav], backgroundColor: ['#e0827b', '#34d399'], borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } } });
 
-      const ctx2 = document.getElementById('donutChart').getContext('2d');
       if (donutChartInstance) donutChartInstance.destroy();
-
-      const labels = currentUser.accountType === 'factory' 
-        ? ['Boiler Coal', 'Hazardous Waste', 'Solid Waste'] 
-        : ['Transport', 'Grid Power', 'Household Waste'];
-        
-      const data = currentUser.accountType === 'factory' 
-        ? [coalCO2, hazCO2, solidCO2] 
-        : [transportCO2, powerCO2, wasteCO2];
-        
-      const colors = currentUser.accountType === 'factory' 
-        ? ['#f43f5e', '#f59e0b', '#06b6d4'] 
-        : ['#06b6d4', '#f59e0b', '#f43f5e'];
-
-      donutChartInstance = new Chart(ctx2, {
-        type: 'doughnut',
-        data: { labels, datasets: [{ data, backgroundColor: colors }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
-      });
+      const labels = currentUser.accountType === 'factory' ? ['Coal', 'Haz Waste', 'Solid Waste'] : ['Transport', 'Power', 'Waste'];
+      const data = currentUser.accountType === 'factory' ? [c, h, s] : [t, p, w];
+      donutChartInstance = new Chart(document.getElementById('donutChart'), { type: 'doughnut', data: { labels, datasets: [{ data, backgroundColor: ['#e0827b', '#d9c48f', '#34d399'], borderWidth: 0 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 8, font: { size: 9 }, color: '#85958c' } } } } });
     }
 
     async function loadLeaderboard() {
       const res = await fetch('/api/leaderboard');
       const data = await res.json();
-      const body = document.getElementById('leaderboard-body');
-      body.innerHTML = '';
-      data.forEach((user, index) => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class="p-3 font-bold">${index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : index + 1}</td>
-          <td class="p-3 font-semibold text-white">${user.username}</td>
-          <td class="p-3 uppercase text-[10px] text-slate-400"><span class="px-2 py-0.5 rounded-full border border-white/10 bg-obsidian">${user.accountType}</span></td>
-          <td class="p-3 text-emeraldAccent font-semibold">${user.totalSaved.toFixed(1)} kg</td>
-          <td class="p-3 text-right text-cyberCyan font-bold">${user.totalCredits.toFixed(5)}</td>
-        `;
-        body.appendChild(row);
-      });
+      document.getElementById('leaderboard-body').innerHTML = data.map((u, i) => `<tr><td class="p-3.5">${i+1}</td><td class="p-3.5">${u.username}</td><td class="p-3.5 uppercase text-[9px]" style="color:var(--muted)">${u.accountType}</td><td class="p-3.5 text-matrixNeon">${u.totalSaved.toFixed(1)} kg</td><td class="p-3.5 text-right text-electricGreen">${u.totalCredits.toFixed(5)}</td></tr>`).join('');
     }
 
-    async function deleteLog(id) {
-      await fetch(`/api/logs/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } });
-      showToast('Record deleted.', 'success');
-      loadLogsFromDatabase();
-      loadLeaderboard();
-      loadSustainabilityAdvisor();
-    }
-
-    function downloadCSV() {
-      window.open(`/api/export/csv?token=${token}`, '_blank');
-      showToast('Generating CSV report...', 'success');
-    }
-
-    function downloadPDF() {
-      showToast('Compiling Certificate...', 'success');
-      fetch('/api/export/certificate', { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(res => res.blob())
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a'); a.href = url; a.download = `Carbon_Certificate_${currentUser.username}.pdf`;
-          document.body.appendChild(a); a.click(); a.remove();
-        });
-    }
-
-    function downloadMonthlyPDF() {
-      showToast('Compiling Monthly Analytics PDF Report...', 'success');
-      fetch('/api/export/monthly-pdf', { headers: { 'Authorization': `Bearer ${token}` } })
-        .then(res => res.blob())
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const a = document.createElement('a'); a.href = url; a.download = `Monthly_Carbon_Report_${currentUser.username}.pdf`;
-          document.body.appendChild(a); a.click(); a.remove();
-        });
-    }
+    async function deleteLog(id) { await fetch(`/api/logs/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` } }); loadLogsFromDatabase(); loadLeaderboard(); }
+    function downloadCSV() { window.open(`/api/export/csv?token=${token}`, '_blank'); }
+    function downloadPDF() { fetch('/api/export/certificate', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.blob()).then(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'EcoMatrix_Certificate.pdf'; a.click(); }); }
+    function downloadMonthlyPDF() { fetch('/api/export/monthly-pdf', { headers: { 'Authorization': `Bearer ${token}` } }).then(r => r.blob()).then(b => { const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'EcoMatrix_Telemetry_Report.pdf'; a.click(); }); }
   </script>
 </body>
 </html>

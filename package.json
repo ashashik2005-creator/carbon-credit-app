@@ -10,8 +10,12 @@
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "json2csv": "^6.0.0-alpha.2",
     "jsonwebtoken": "^9.0.2",
+    "mongodb-memory-server": "^11.2.0",
     "mongoose": "^8.3.0",
+    "nedb": "^1.8.0",
+    "nedb-promises": "^6.2.3",
     "nodemailer": "^9.0.5",
     "pdfkit": "^0.15.0"
   }
